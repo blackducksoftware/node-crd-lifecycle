@@ -1,64 +1,20 @@
 const express = require('express');
 const app = express();
 const path = require('path');
-
-// const Client = require('kubernetes-client').Client;
-// const config = require('kubernetes-client').config;
-// const client = new Client({ config: config.getInCluster() });
-//
-// const x = async() => {
-//     await client.loadSpec();
-// }
-// x();
-
 const Client = require('kubernetes-client').Client;
 const config = require('kubernetes-client').config;
-const client = new Client({ config: config.fromKubeconfig(), version: '1.9' });
-// const x = {
-//     namespace: 'jay1',
-//     flavor: 'small',
-//     hubTimeout: '2',
-//     dockerRegistry: 'docker.io',
-//     dockerRepo: 'blackducksoftware',
-//     hubVersion: '4.6.1',
-//     status: 'pending'
-// }
-// const z = {
-//     namespace: 'jay2',
-//     flavor: 'small',
-//     hubTimeout: '4',
-//     dockerRegistry: 'docker.io',
-//     dockerRepo: 'blackducksoftware',
-//     hubVersion: '4.6.1',
-//     status: 'pending'
-// }
-// client.api.v1.namespaces('default')
-//     .configmaps('saas-customers')
-//     .get()
-//     .then((resp) => {
-//         const { body } = resp;
-//         const y = JSON.stringify(x);
-//         const a = JSON.stringify(z);
-//         const newBody = {
-//             ...body,
-//             'data': {
-//                 'jay1' : `${y}`,
-//                 'jay2' : `${a}`
-//             }
-//         };
-//         client.api.v1.namespaces('default')
-//             .configmaps('saas-customers')
-//             .put({
-//                 body: newBody
-//             })
-//     })
 
-// client.api.v1.namespaces('default')
-//     .configmaps('saas-customers')
-//     .get()
-//     .then((response) => {
-//         console.log('saas-customers', response);
-//     })
+try {
+    const client = new Client({ config: config.getInCluster() });
+    const loadConfig = async () => {
+        await client.loadSpec();
+    }
+    loadConfig();
+    console.log('In cluster');
+} catch (e) {
+    const client = new Client({ config: config.fromKubeconfig(), version: '1.9' });
+    console.log('Out of cluster');
+}
 
 const token = 'RGB';
 
