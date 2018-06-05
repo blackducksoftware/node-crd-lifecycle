@@ -1,0 +1,66 @@
+* {
+    box-sizing: border-box;
+}
+
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 80px;
+}
+
+.App-header {
+  background-color: #222;
+  height: 150px;
+  padding: 20px;
+  color: white;
+}
+
+.App-title {
+  font-size: 1.5em;
+}
+
+.App-intro {
+  font-size: large;
+}
+
+input:focus, textarea:focus {
+    outline: none;
+}
+
+.form-container {
+    display: flex;
+    justify-content: center
+}
+
+.staging-form {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    max-width: 70vw;
+    text-align: left;
+    padding: 10px;
+}
+
+.input-container {
+    padding: 10px;
+}
+
+.input-text {
+    margin-left: 10px;
+    border: none;
+    border-bottom: 1px solid black;
+}
+
+#size-container {
+    display: flex;
+}
+
+.size-radio {
+    padding-left: 5px;
+}
+
+#submit-container {
+    width: 100px;
+}
