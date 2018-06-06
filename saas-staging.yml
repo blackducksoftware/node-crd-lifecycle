@@ -5,6 +5,20 @@ metadata:
   selfLink: ""
 items:
 - apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      name: node-crd-lifecycle
+    name: node-crd-lifecycle-exp
+    namespace: saas-customers
+  spec:
+    ports:
+    - port: 3001
+      targetPort: 3001
+    selector:
+      name: node-crd-lifecycle
+    type: LoadBalancer
+- apiVersion: v1
   kind: ReplicationController
   metadata:
     labels:
