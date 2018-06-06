@@ -42,27 +42,34 @@ const styles = theme => ({
     },
 });
 
+const initialState = {
+    namespace: '',
+    flavor: 'small',
+    hubTimeout: '2',
+    dockerRegistry: 'docker.io',
+    dockerRepo: 'blackducksoftware',
+    hubVersion: '4.6.1',
+    status: 'pending',
+    token: ''
+};
+
 class StagingForm extends Component {
     constructor(props) {
         super(props);
-        this.state = {
-            namespace: '',
-            flavor: 'small',
-            hubTimeout: '2',
-            dockerRegistry: 'docker.io',
-            dockerRepo: 'blackducksoftware',
-            hubVersion: '4.6.1',
-            status: 'pending',
-            token: ''
-        };
+        this.state = initialState;
 
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
+        this.resetForm = this.resetForm.bind(this);
     }
 
     handleChange(event) {
         const stateKey = event.target.name;
         this.setState({ [stateKey]: event.target.value });
+    }
+
+    resetForm() {
+        this.setState(initialState);
     }
 
     async handleSubmit(event) {
@@ -81,6 +88,7 @@ class StagingForm extends Component {
         if (response.status === 200) {
             console.log('/api/customers - POST success');
             this.props.addCustomer(formData);
+            this.resetForm()
         }
     }
 
@@ -120,7 +128,7 @@ class StagingForm extends Component {
                                         <FormControlLabel
                                             key={`flavor-${size}`}
                                             value={size}
-                                            control={<Radio />}
+                                            control={<Radio color="primary" />}
                                             label={size}
                                         />
                                     );

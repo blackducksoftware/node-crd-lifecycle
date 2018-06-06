@@ -70,7 +70,7 @@ class App extends Component {
             <div className="App">
                 <header className="App-header">
                     <img src={bdsLogo} className="App-logo" alt="logo" />
-                    <h1 className="App-title">HUB SaaS Staging</h1>
+                    <h1 className="App-title">Hub SaaS Staging</h1>
                 </header>
                 <StagingForm
                     kubeSizes={this.state.kubeSizes}
