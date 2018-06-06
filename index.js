@@ -3,20 +3,22 @@ const app = express();
 const path = require('path');
 const Client = require('kubernetes-client').Client;
 const config = require('kubernetes-client').config;
+let client;
 
 try {
-    const client = new Client({ config: config.getInCluster() });
+    client = new Client({ config: config.getInCluster() });
     const loadConfig = async () => {
         await client.loadSpec();
     }
     loadConfig();
     console.log('In cluster');
 } catch (e) {
-    const client = new Client({ config: config.fromKubeconfig(), version: '1.9' });
+    client = new Client({ config: config.fromKubeconfig(), version: '1.9' });
     console.log('Out of cluster');
 }
 
-const token = process.env.TOKEN;
+const token = 'RGB';
+// const token = process.env.TOKEN;
 
 app.use(express.json());
 app.use('/static', express.static(path.join(__dirname, 'client', 'build', 'static')));
@@ -28,11 +30,11 @@ const tokenIsInvalid = (req, res) => {
     }
 }
 
-app.listen(3001, () => console.log('Sachin is alive!'))
-
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'));
 });
+
+app.listen(3001, () => console.log('Sachin is alive!'))
 
 app.get('/api/customers', (req, res) => {
     if (!tokenIsInvalid(req, res)) {
@@ -40,6 +42,7 @@ app.get('/api/customers', (req, res) => {
             .configmaps('saas-customers')
             .get()
             .then((response) => {
+                console.log('/api/customers - configmap received');
                 const customers = response.body.data;
                 const namespaces = Object.keys(customers);
                 const realData = namespaces.reduce((obj, namespace) => {
@@ -49,6 +52,9 @@ app.get('/api/customers', (req, res) => {
                 }, {})
                 res.setHeader('Content-Type', 'application/json');
                 res.send(JSON.stringify(realData));
+            })
+            .catch((error) => {
+                console.log(error);
             })
     }
 })
@@ -76,6 +82,9 @@ app.post('/api/customers', (req, res) => {
                     .patch({
                         body: newBody
                     })
+            })
+            .catch((error) => {
+                console.log(error);
             })
         res.sendStatus(200);
     }

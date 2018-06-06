@@ -29,38 +29,8 @@ input:focus, textarea:focus {
     outline: none;
 }
 
-.form-container {
-    display: flex;
-    justify-content: center
-}
-
-.staging-form {
-    flex: 1;
+#staging-form {
     display: flex;
     flex-direction: column;
-    max-width: 70vw;
-    text-align: left;
-    padding: 10px;
-}
-
-.input-container {
-    padding: 10px;
-}
-
-.input-text {
-    margin-left: 10px;
-    border: none;
-    border-bottom: 1px solid black;
-}
-
-#size-container {
-    display: flex;
-}
-
-.size-radio {
-    padding-left: 5px;
-}
-
-#submit-container {
-    width: 100px;
+    align-items: center;
 }

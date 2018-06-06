@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import bdsLogo from './icon.ico';
 import './App.css';
 import StagingForm from './StagingForm';
-import HubInstances from './HubInstances';
+import InstanceTable from './InstanceTable';
 
 class App extends Component {
     constructor(props) {
@@ -12,7 +12,7 @@ class App extends Component {
                 'small',
                 'medium',
                 'large',
-                'opsSight'
+                'OpsSight'
             ],
             expirationHours: [
                 '2',
@@ -46,7 +46,7 @@ class App extends Component {
             mode: 'same-origin',
         });
         if (response.status === 200) {
-            console.log('w00t');
+            console.log('Customer data fetched');
             const customers = await response.json();
             this.setState({
                 customers
@@ -70,14 +70,16 @@ class App extends Component {
             <div className="App">
                 <header className="App-header">
                     <img src={bdsLogo} className="App-logo" alt="logo" />
-                    <h1 className="App-title">Kipp Saas Staging</h1>
+                    <h1 className="App-title">HUB SaaS Staging</h1>
                 </header>
                 <StagingForm
                     kubeSizes={this.state.kubeSizes}
                     expirationHours={this.state.expirationHours}
                     addCustomer={this.addCustomer}
                 />
-                <HubInstances customers={this.state.customers} removeCustomer={this.removeCustomer} />
+                <div className='paper-container'>
+                    <InstanceTable customers={this.state.customers} removeCustomer={this.removeCustomer} />
+                </div>
             </div>
         );
     }
