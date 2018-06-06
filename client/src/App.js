@@ -32,7 +32,14 @@ class App extends Component {
     }
 
     componentDidMount() {
+        this.pollCustomers = setInterval(() => {
+            return this.fetchCustomers();
+        }, 60000);
         this.fetchCustomers();
+    }
+
+    componentWillUnmount() {
+        clearInterval(this.pollCustomers);
     }
 
     async fetchCustomers() {

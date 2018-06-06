@@ -18,8 +18,7 @@ try {
     console.log('Out of cluster');
 }
 
-const token = 'RGB';
-// const token = process.env.TOKEN;
+const token = process.env.TOKEN;
 
 app.use(express.json());
 app.use('/static', express.static(path.join(__dirname, 'client', 'build', 'static')));
