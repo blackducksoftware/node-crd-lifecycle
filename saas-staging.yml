@@ -27,7 +27,7 @@ items:
         containers:
         - env:
           - name: TOKEN
-            value: <REPLACE_THIS>
+###            value: <REPLACE_THIS> ###
           image: gcr.io/gke-verification/github-blackducksoftware-node-crd-lifecycle:master
           imagePullPolicy: Always
           name: nrd-crd-lifecycle
