@@ -34,3 +34,7 @@ input:focus, textarea:focus {
     flex-direction: column;
     align-items: center;
 }
+
+.paper-container {
+    margin-bottom: 50px;
+}

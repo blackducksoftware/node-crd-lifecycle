@@ -5,6 +5,7 @@ const Client = require('kubernetes-client').Client;
 const config = require('kubernetes-client').config;
 let client;
 
+// try in-cluster config, otherwise fall back to local minikube config
 try {
     client = new Client({ config: config.getInCluster() });
     const loadConfig = async () => {
@@ -34,7 +35,7 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'));
 });
 
-app.listen(3001, () => console.log('Sachin is alive!'))
+app.listen(3001, () => console.log('Node server running on port 3001'))
 
 app.get('/api/customers', (req, res) => {
     if (!tokenIsInvalid(req, res)) {
@@ -68,6 +69,7 @@ app.post('/api/customers', (req, res) => {
             .configmaps('saas-customers')
             .get()
             .then((resp) => {
+                console.log('/api/customers - configmap received');
                 const { body } = resp;
                 const { data } = body;
                 const newBody = {
@@ -82,10 +84,13 @@ app.post('/api/customers', (req, res) => {
                     .patch({
                         body: newBody
                     })
+                    .then(() => {
+                        console.log('/api/customers - configmap PATCH success');
+                        res.sendStatus(200);
+                    })
             })
             .catch((error) => {
                 console.log(error);
             })
-        res.sendStatus(200);
     }
 })
