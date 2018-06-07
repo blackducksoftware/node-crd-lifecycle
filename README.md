@@ -1,6 +1,6 @@
 To run:
 ```
-cd ./client/src && npm install && npm run build && npm start
+(cd ./client/src && npm install && npm run build ); node index.js
 ```
 
 For local dev:
