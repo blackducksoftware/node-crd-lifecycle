@@ -42,7 +42,7 @@ app.get('/api/customers', (req, res) => {
             .configmaps('saas-customers')
             .get()
             .then((response) => {
-                console.log('/api/customers - configmap received:' + response.body.data);
+                console.log('/api/customers - configmap received:' + JSON.stringify(response.body.data));
                 const customers = response.body.data;
                 const namespaces = Object.keys(customers);
                 const realData = namespaces.reduce((obj, namespace) => {
