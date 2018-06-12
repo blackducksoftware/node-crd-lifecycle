@@ -46,9 +46,9 @@ const initialState = {
     namespace: '',
     flavor: 'small',
     hubTimeout: '2',
-    dockerRegistry: 'docker.io',
-    dockerRepo: 'blackducksoftware',
-    hubVersion: '4.6.1',
+    dockerRegistry: 'gcr.io',
+    dockerRepo: 'gke-verification/blackducksoftware',
+    hubVersion: '4.7.0',
     status: 'pending',
     token: ''
 };

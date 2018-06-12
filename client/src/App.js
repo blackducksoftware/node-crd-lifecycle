@@ -34,7 +34,7 @@ class App extends Component {
     componentDidMount() {
         this.pollCustomers = setInterval(() => {
             return this.fetchCustomers();
-        }, 60000);
+        }, 5000);
         this.fetchCustomers();
     }
 

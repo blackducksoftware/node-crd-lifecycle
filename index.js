@@ -38,12 +38,13 @@ app.get('/', (req, res) => {
 app.listen(3001, () => console.log('Node server running on port 3001'))
 
 app.get('/api/customers', (req, res) => {
+    console.log(""+Date.now())
     if (!tokenIsInvalid(req, res)) {
         client.api.v1.namespaces('default')
             .configmaps('saas-customers')
             .get()
             .then((response) => {
-                console.log('/api/customers - configmap received');
+                console.log('/api/customers - configmap received:' + JSON.stringify(response.body.data) + "\n");
                 const customers = response.body.data;
                 const namespaces = Object.keys(customers);
                 const realData = namespaces.reduce((obj, namespace) => {
