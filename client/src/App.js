@@ -25,11 +25,13 @@ class App extends Component {
                 'never'
             ],
             // TODO: change all customer references to instances
-            customers : {}
+            customers: {},
+            invalidNamespace: false
         };
 
         this.fetchCustomers = this.fetchCustomers.bind(this);
         this.addInstance = this.addInstance.bind(this);
+        this.setNamespaceStatus = this.setNamespaceStatus.bind(this);
     }
 
     componentDidMount() {
@@ -73,6 +75,12 @@ class App extends Component {
         });
     }
 
+    setNamespaceStatus(isNamespaceInvalid) {
+        if (this.state.invalidNamespace !== isNamespaceInvalid) {
+            this.setState({ invalidNamespace: isNamespaceInvalid});
+        }
+    }
+
     render() {
         return (
             <div className="App">
@@ -84,6 +92,8 @@ class App extends Component {
                     kubeSizes={this.state.kubeSizes}
                     expirationHours={this.state.expirationHours}
                     addInstance={this.addInstance}
+                    setNamespaceStatus={this.setNamespaceStatus}
+                    invalidNamespace={this.state.invalidNamespace}
                 />
                 <div className='paper-container'>
                     <InstanceTable customers={this.state.customers} removeCustomer={this.removeCustomer} />

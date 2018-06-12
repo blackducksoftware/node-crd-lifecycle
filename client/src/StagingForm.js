@@ -48,7 +48,7 @@ const styles = theme => ({
     },
 });
 
-// TODO: nest toast state?
+// TODO: move toast state up into app? decouple form/toast state?
 const initialState = {
     namespace: '',
     flavor: 'small',
@@ -74,6 +74,18 @@ class StagingForm extends Component {
         this.handleSubmit = this.handleSubmit.bind(this);
         this.resetForm = this.resetForm.bind(this);
         this.handleToastMsgClick = this.handleToastMsgClick.bind(this);
+    }
+
+    componentDidMount() {
+        this.namespaceField.addEventListener('blur', (event) => {
+            const regExp = RegExp(/[A-Z`~,<>;':"/[\]|{}()=_+!@#$%^&*]+/)
+            const isNamespaceInvalid = regExp.test(event.target.value);
+            this.props.setNamespaceStatus(isNamespaceInvalid);
+        })
+    }
+
+    componentWillUnmount() {
+        return;
     }
 
     handleChange(event) {
@@ -138,6 +150,7 @@ class StagingForm extends Component {
 
     render() {
         const { classes } = this.props;
+        // TODO: destructure other props
         // const primary = deepPurple[200];
 
         return (
@@ -156,6 +169,9 @@ class StagingForm extends Component {
                         value={this.state.namespace}
                         onChange={this.handleChange}
                         margin="normal"
+                        autoFocus
+                        inputRef={el => this.namespaceField = el}
+                        error={this.props.invalidNamespace}
                     />
                     <div className={classes.root}>
                         <FormControl component="fieldset" className={classes.formControl}>
@@ -247,6 +263,7 @@ class StagingForm extends Component {
                         type='submit'
                         color="primary"
                         onClick={this.handleSubmit}
+                        disabled={this.props.invalidNamespace}
                     >
                         Submit
                     </Button>
