@@ -10,6 +10,7 @@
   "author": "ok_anthony",
   "license": "ISC",
   "dependencies": {
+    "dotenv": "^6.0.0",
     "express": "^4.16.3",
     "kubernetes-client": "^5.3.0"
   }

@@ -3,6 +3,7 @@ const app = express();
 const path = require('path');
 const Client = require('kubernetes-client').Client;
 const config = require('kubernetes-client').config;
+require('dotenv').config()
 let client;
 
 // try in-cluster config, otherwise fall back to local minikube config
@@ -12,10 +13,10 @@ try {
         await client.loadSpec();
     }
     loadConfig();
-    console.log('In cluster');
+    console.log('Kube Config: in cluster');
 } catch (e) {
     client = new Client({ config: config.fromKubeconfig(), version: '1.9' });
-    console.log('Out of cluster');
+    console.log('Kube Config: out of cluster');
 }
 
 const token = process.env.TOKEN;
