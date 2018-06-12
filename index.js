@@ -38,7 +38,7 @@ app.get('/', (req, res) => {
 app.listen(3001, () => console.log('Node server running on port 3001'))
 
 app.get('/api/customers', (req, res) => {
-    console.log(""+Date.now())
+    console.log(new Date());
     if (!tokenIsInvalid(req, res)) {
         client.api.v1.namespaces('default')
             .configmaps('saas-customers')

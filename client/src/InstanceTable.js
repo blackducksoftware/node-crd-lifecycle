@@ -29,7 +29,7 @@ const InstanceTable = ({ customers, removeCustomer, classes }) => {
         );
     }
 
-    return(
+    return (
         <Paper className={classes.root}>
             <Table className={classes.table}>
                 <TableHead>

@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import MenuItem from '@material-ui/core/MenuItem';
 import TextField from '@material-ui/core/TextField';
@@ -8,6 +9,7 @@ import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
 import FormLabel from '@material-ui/core/FormLabel';
+import ToastMsg from './ToastMsg';
 // import deepPurple from '@material-ui/core/colors/purple';
 
 const styles = theme => ({
@@ -34,14 +36,19 @@ const styles = theme => ({
         marginLeft: theme.spacing.unit,
     },
     formControl: {
-      margin: theme.spacing.unit * 3,
+        margin: theme.spacing.unit * 3,
     },
     group: {
-      margin: `${theme.spacing.unit}px 0`,
-      flexDirection: 'row'
+        margin: `${theme.spacing.unit}px 0`,
+        flexDirection: 'row'
+    },
+    close: {
+        width: theme.spacing.unit * 4,
+        height: theme.spacing.unit * 4,
     },
 });
 
+// TODO: nest toast state?
 const initialState = {
     namespace: '',
     flavor: 'small',
@@ -50,17 +57,23 @@ const initialState = {
     dockerRepo: 'gke-verification/blackducksoftware',
     hubVersion: '4.7.0',
     status: 'pending',
-    token: ''
+    token: '',
+    toastMsgOpen: false,
+    toastMsgText: '',
+    toastMsgVariant: 'success'
 };
 
 class StagingForm extends Component {
     constructor(props) {
         super(props);
+        // TODO: spread initialState + toast msg so toast not overwritten on poll
         this.state = initialState;
 
+        // TODO: React docs - transform pkg, don't need to bind
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
         this.resetForm = this.resetForm.bind(this);
+        this.handleToastMsgClick = this.handleToastMsgClick.bind(this);
     }
 
     handleChange(event) {
@@ -69,12 +82,32 @@ class StagingForm extends Component {
     }
 
     resetForm() {
-        this.setState(initialState);
+        const {
+            toastMsgOpen,
+            toastMsgText,
+            toastMsgVariant,
+            ...rest
+        } = initialState;
+        this.setState(rest);
     }
+
+    handleToastMsgClick(event, reason) {
+        if (reason === 'clickaway') {
+            return;
+        }
+
+        this.setState({ toastMsgOpen: false });
+    };
 
     async handleSubmit(event) {
         event.preventDefault();
-        const { token, ...formData } = this.state;
+        const {
+            token,
+            toastMsgOpen,
+            toastMsgText,
+            toastMsgVariant,
+            ...formData
+        } = this.state;
         const response = await fetch('/api/customers', {
             method: 'POST',
             credentials: 'same-origin',
@@ -86,10 +119,21 @@ class StagingForm extends Component {
             body: JSON.stringify(formData),
         });
         if (response.status === 200) {
-            console.log('/api/customers - POST success');
-            this.props.addCustomer(formData);
+            this.setState({
+                toastMsgOpen: true,
+                toastMsgVariant: 'success',
+                toastMsgText: 'Hub instance submitted! IP address will appear shortly'
+            });
+            this.props.addInstance(formData);
             this.resetForm()
+            return;
         }
+
+        this.setState({
+            toastMsgOpen: true,
+            toastMsgVariant: 'error',
+            toastMsgText: 'Invalid token, check your token and try again'
+        });
     }
 
     render() {
@@ -206,6 +250,12 @@ class StagingForm extends Component {
                     >
                         Submit
                     </Button>
+                    <ToastMsg
+                        message={this.state.toastMsgText}
+                        variant={this.state.toastMsgVariant}
+                        toastMsgOpen={this.state.toastMsgOpen}
+                        onClose={this.handleToastMsgClick}
+                    />
                 </form>
             </div>
         );
@@ -213,3 +263,9 @@ class StagingForm extends Component {
 }
 
 export default withStyles(styles)(StagingForm);
+
+StagingForm.propTypes = {
+    kubeSizes: PropTypes.arrayOf(PropTypes.string),
+    expirationHours: PropTypes.arrayOf(PropTypes.string),
+    addInstance: PropTypes.func
+}

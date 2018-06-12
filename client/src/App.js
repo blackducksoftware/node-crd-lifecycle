@@ -24,11 +24,12 @@ class App extends Component {
                 '128',
                 'never'
             ],
+            // TODO: change all customer references to instances
             customers : {}
         };
 
         this.fetchCustomers = this.fetchCustomers.bind(this);
-        this.addCustomer = this.addCustomer.bind(this);
+        this.addInstance = this.addInstance.bind(this);
     }
 
     componentDidMount() {
@@ -61,7 +62,7 @@ class App extends Component {
         }
     }
 
-    addCustomer(customer) {
+    addInstance(customer) {
         this.setState({
             customers: {
                 ...this.state.customers,
@@ -82,7 +83,7 @@ class App extends Component {
                 <StagingForm
                     kubeSizes={this.state.kubeSizes}
                     expirationHours={this.state.expirationHours}
-                    addCustomer={this.addCustomer}
+                    addInstance={this.addInstance}
                 />
                 <div className='paper-container'>
                     <InstanceTable customers={this.state.customers} removeCustomer={this.removeCustomer} />
