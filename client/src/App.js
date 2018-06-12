@@ -36,6 +36,8 @@ class App extends Component {
             return this.fetchCustomers();
         }, 60000);
         this.fetchCustomers();
+
+        // gapi.client.load('sqladmin', 'v1beta4', function() { console.log('loaded');});
     }
 
     componentWillUnmount() {

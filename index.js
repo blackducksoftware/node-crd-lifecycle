@@ -3,6 +3,9 @@ const app = express();
 const path = require('path');
 const Client = require('kubernetes-client').Client;
 const config = require('kubernetes-client').config;
+const { google } = require('googleapis');
+const sqlAdmin = google.sqladmin('v1beta4');
+const { auth } = require('google-auth-library');
 let client;
 
 // try in-cluster config, otherwise fall back to local minikube config
@@ -93,3 +96,48 @@ app.post('/api/customers', (req, res) => {
             })
     }
 })
+
+
+authorize(function(authClient) {
+  var request = {
+    project: 'gke-verification',
+    auth: authClient,
+  };
+
+  var handlePage = function(err, response) {
+    if (err) {
+      console.error(err);
+      return;
+    }
+
+    var itemsPage = response['items'];
+    if (!itemsPage) {
+      return;
+    }
+    for (var i = 0; i < itemsPage.length; i++) {
+      // TODO: Change code below to process each resource in `itemsPage`:
+      console.log(JSON.stringify(itemsPage[i], null, 2));
+    }
+
+    if (response.nextPageToken) {
+      request.pageToken = response.nextPageToken;
+      sqlAdmin.instances.list(request, handlePage);
+    }
+  };
+
+  sqlAdmin.instances.list(request, handlePage);
+});
+
+function authorize(callback) {
+  google.auth.getApplicationDefault(function(err, authClient) {
+    if (err) {
+      console.error('authentication failed: ', err);
+      return;
+    }
+    if (authClient.createScopedRequired && authClient.createScopedRequired()) {
+      var scopes = ['https://www.googleapis.com/auth/cloud-platform'];
+      authClient = authClient.createScoped(scopes);
+    }
+    callback(authClient);
+  });
+}

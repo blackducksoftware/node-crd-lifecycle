@@ -15,6 +15,7 @@ RUN npm install
 # Bundle app source
 COPY . .
 
+# Install and compile client dependencies
 RUN cd ./client/src && npm install && npm run build
 
 EXPOSE 3001
