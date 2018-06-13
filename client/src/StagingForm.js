@@ -56,6 +56,7 @@ const initialState = {
     dockerRegistry: 'gcr.io',
     dockerRepo: 'gke-verification/blackducksoftware',
     hubVersion: '4.7.0',
+    dbPrototype: '',
     status: 'pending',
     token: '',
     toastMsgOpen: false,
@@ -156,7 +157,8 @@ class StagingForm extends Component {
             classes,
             invalidNamespace,
             kubeSizes,
-            expirationHours
+            expirationHours,
+            dbInstances
         } = this.props;
         // const primary = deepPurple[200];
 
@@ -205,9 +207,9 @@ class StagingForm extends Component {
                         </FormControl>
                     </div>
                     <TextField
+                        select
                         id="hubTimeout"
                         name="hubTimeout"
-                        select
                         label="Expiration (hrs)"
                         className={classes.textField}
                         value={this.state.hubTimeout}
@@ -255,6 +257,29 @@ class StagingForm extends Component {
                         margin="normal"
                     />
                     <TextField
+                        select
+                        id="dbPrototype"
+                        name="dbPrototype"
+                        label="Database"
+                        className={classes.textField}
+                        value={this.state.dbPrototype}
+                        onChange={this.handleChange}
+                        SelectProps={{
+                            MenuProps: {
+                                className: classes.menu,
+                            },
+                        }}
+                        margin="normal"
+                    >
+                        {dbInstances.map((instance) => {
+                            return (
+                                <MenuItem key={`instance-${instance}`} value={instance}>
+                                    {instance}
+                                </MenuItem>
+                            );
+                        })}
+                    </TextField>
+                    <TextField
                         id="token"
                         name="token"
                         label="Token"
@@ -289,8 +314,9 @@ class StagingForm extends Component {
 export default withStyles(styles)(StagingForm);
 
 StagingForm.propTypes = {
-    kubeSizes: PropTypes.arrayOf(PropTypes.string),
-    invalidNamespace: PropTypes.bool,
+    addInstance: PropTypes.func,
+    dbInstances: PropTypes.arrayOf(PropTypes.string),
     expirationHours: PropTypes.arrayOf(PropTypes.string),
-    addInstance: PropTypes.func
+    invalidNamespace: PropTypes.bool,
+    kubeSizes: PropTypes.arrayOf(PropTypes.string)
 }

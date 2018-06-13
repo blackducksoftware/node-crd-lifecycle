@@ -3,6 +3,8 @@ const app = express();
 const path = require('path');
 const Client = require('kubernetes-client').Client;
 const config = require('kubernetes-client').config;
+const { google } = require('googleapis');
+const sqlAdmin = google.sqladmin('v1beta4');
 require('dotenv').config()
 let client;
 
@@ -95,3 +97,55 @@ app.post('/api/customers', (req, res) => {
             })
     }
 })
+
+app.get('/api/sql-instances', (req, res) => {
+    console.log(new Date());
+    if (!tokenIsInvalid(req, res)) {
+        authorize(function(authClient) {
+          var request = {
+            project: 'gke-verification',
+            auth: authClient,
+          };
+
+          var handlePage = function(err, response) {
+            if (err) {
+              console.error(err);
+              return res.status(500).json({ error: 'SQL Instances failed to load, blame Google' });
+            }
+
+            const dbInstances = response.data.items.map((instance) => instance.name);
+            res.setHeader('Content-Type', 'application/json');
+            res.send(JSON.stringify(dbInstances));
+            // console.log('d', response.data.items);
+            // if (!itemsPage) {
+            //   return;
+            // }
+            // for (var i = 0; i < itemsPage.length; i++) {
+            //   // TODO: Change code below to process each resource in `itemsPage`:
+            //   console.log(JSON.stringify(itemsPage[i], null, 2));
+            // }
+            //
+            // if (response.nextPageToken) {
+            //   request.pageToken = response.nextPageToken;
+            //   sqlAdmin.instances.list(request, handlePage);
+            // }
+          };
+
+          sqlAdmin.instances.list(request, handlePage);
+        });
+    }
+})
+
+function authorize(callback) {
+  google.auth.getApplicationDefault(function(err, authClient) {
+    if (err) {
+      console.error('authentication failed: ', err);
+      return;
+    }
+    if (authClient.createScopedRequired && authClient.createScopedRequired()) {
+      var scopes = ['https://www.googleapis.com/auth/cloud-platform'];
+      authClient = authClient.createScoped(scopes);
+    }
+    callback(authClient);
+  });
+}

@@ -26,19 +26,22 @@ class App extends Component {
             ],
             // TODO: change all customer references to instances
             customers: {},
+            dbInstances: [],
             invalidNamespace: false
         };
 
         this.fetchCustomers = this.fetchCustomers.bind(this);
         this.addInstance = this.addInstance.bind(this);
         this.setNamespaceStatus = this.setNamespaceStatus.bind(this);
+        this.fetchDbInstances = this.fetchDbInstances.bind(this);
     }
 
     componentDidMount() {
         this.pollCustomers = setInterval(() => {
             return this.fetchCustomers();
-        }, 5000);
+        }, 60000);
         this.fetchCustomers();
+        this.fetchDbInstances();
     }
 
     componentWillUnmount() {
@@ -81,6 +84,25 @@ class App extends Component {
         }
     }
 
+    async fetchDbInstances() {
+        const response = await fetch('/api/sql-instances', {
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json',
+                'rgb-token': 'RGB'
+            },
+            accept: 'application/json',
+            mode: 'same-origin',
+        });
+        if (response.status === 200) {
+            console.log('DB Instances fetched');
+            const dbInstances = await response.json();
+            this.setState({
+                dbInstances
+            })
+        }
+    }
+
     render() {
         return (
             <div className="App">
@@ -94,6 +116,7 @@ class App extends Component {
                     addInstance={this.addInstance}
                     setNamespaceStatus={this.setNamespaceStatus}
                     invalidNamespace={this.state.invalidNamespace}
+                    dbInstances={this.state.dbInstances}
                 />
                 <div className='paper-container'>
                     <InstanceTable customers={this.state.customers} removeCustomer={this.removeCustomer} />

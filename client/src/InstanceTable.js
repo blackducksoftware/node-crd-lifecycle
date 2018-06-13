@@ -38,6 +38,7 @@ const InstanceTable = ({ customers, removeCustomer, classes }) => {
                         <TableCell>Size</TableCell>
                         <TableCell>Expiration</TableCell>
                         <TableCell>Hub Version</TableCell>
+                        <TableCell>Database</TableCell>
                         <TableCell>Status</TableCell>
                         <TableCell>IP Address</TableCell>
                     </TableRow>
@@ -53,6 +54,7 @@ const InstanceTable = ({ customers, removeCustomer, classes }) => {
                                 <TableCell>{customer.flavor}</TableCell>
                                 <TableCell>{customer.hubTimeout}</TableCell>
                                 <TableCell>{customer.hubVersion}</TableCell>
+                                <TableCell>{customer.dbPrototype}</TableCell>
                                 <TableCell>{customer.status}</TableCell>
                                 <TableCell>{customer.ip || '-'}</TableCell>
                             </TableRow>
