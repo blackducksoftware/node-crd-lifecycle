@@ -77,15 +77,11 @@ class StagingForm extends Component {
     }
 
     componentDidMount() {
-        this.namespaceField.addEventListener('blur', (event) => {
-            const regExp = RegExp(/[A-Z`~,<>;':"/[\]|{}()=_+!@#$%^&*]+/)
-            const isNamespaceInvalid = regExp.test(event.target.value);
-            this.props.setNamespaceStatus(isNamespaceInvalid);
-        })
+        this.namespaceField.addEventListener('blur', (event) => this.validateNamespace(event));
     }
 
     componentWillUnmount() {
-        return;
+        this.namespaceField.removeEventListener('blur', this.validateNamespace)
     }
 
     handleChange(event) {
@@ -148,9 +144,19 @@ class StagingForm extends Component {
         });
     }
 
+    validateNamespace(event) {
+        const regExp = RegExp(/[A-Z`~,<>;':"/[\]|{}()=_+!@#$%^&*]+/)
+        const invalidNamespace = regExp.test(event.target.value);
+        this.props.setNamespaceStatus(invalidNamespace);
+    }
+
     render() {
-        const { classes } = this.props;
-        // TODO: destructure other props
+        const {
+            classes,
+            invalidNamespace,
+            kubeSizes,
+            expirationHours
+        } = this.props;
         // const primary = deepPurple[200];
 
         return (
@@ -171,7 +177,8 @@ class StagingForm extends Component {
                         margin="normal"
                         autoFocus
                         inputRef={el => this.namespaceField = el}
-                        error={this.props.invalidNamespace}
+                        error={invalidNamespace}
+                        helperText="Lowercase letters, numbers, and hyphens only"
                     />
                     <div className={classes.root}>
                         <FormControl component="fieldset" className={classes.formControl}>
@@ -183,7 +190,7 @@ class StagingForm extends Component {
                                 value={this.state.flavor}
                                 onChange={this.handleChange}
                             >
-                                {this.props.kubeSizes.map((size) => {
+                                {kubeSizes.map((size) => {
                                     return (
                                         <FormControlLabel
                                             key={`flavor-${size}`}
@@ -209,10 +216,9 @@ class StagingForm extends Component {
                                 className: classes.menu,
                             },
                         }}
-                        helperText="Please select desired length of HUB instance"
                         margin="normal"
                     >
-                        {this.props.expirationHours.map((hour) => {
+                        {expirationHours.map((hour) => {
                             return (
                                 <MenuItem key={`expiration-${hour}`} value={hour}>
                                     {hour}
@@ -263,7 +269,7 @@ class StagingForm extends Component {
                         type='submit'
                         color="primary"
                         onClick={this.handleSubmit}
-                        disabled={this.props.invalidNamespace}
+                        disabled={invalidNamespace}
                     >
                         Submit
                     </Button>
@@ -283,6 +289,7 @@ export default withStyles(styles)(StagingForm);
 
 StagingForm.propTypes = {
     kubeSizes: PropTypes.arrayOf(PropTypes.string),
+    invalidNamespace: PropTypes.bool,
     expirationHours: PropTypes.arrayOf(PropTypes.string),
     addInstance: PropTypes.func
 }

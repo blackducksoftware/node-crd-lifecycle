@@ -75,9 +75,9 @@ class App extends Component {
         });
     }
 
-    setNamespaceStatus(isNamespaceInvalid) {
-        if (this.state.invalidNamespace !== isNamespaceInvalid) {
-            this.setState({ invalidNamespace: isNamespaceInvalid});
+    setNamespaceStatus(invalidNamespace) {
+        if (this.state.invalidNamespace !== invalidNamespace) {
+            this.setState({ invalidNamespace });
         }
     }
 
