@@ -5,7 +5,7 @@ const Client = require('kubernetes-client').Client;
 const config = require('kubernetes-client').config;
 const { google } = require('googleapis');
 const sqlAdmin = google.sqladmin('v1beta4');
-const { auth } = require('google-auth-library');
+require('dotenv').config()
 let client;
 
 // try in-cluster config, otherwise fall back to local minikube config
@@ -15,10 +15,10 @@ try {
         await client.loadSpec();
     }
     loadConfig();
-    console.log('In cluster');
+    console.log('Kube Config: in cluster');
 } catch (e) {
     client = new Client({ config: config.fromKubeconfig(), version: '1.9' });
-    console.log('Out of cluster');
+    console.log('Kube Config: out of cluster');
 }
 
 const token = process.env.TOKEN;
@@ -40,12 +40,13 @@ app.get('/', (req, res) => {
 app.listen(3001, () => console.log('Node server running on port 3001'))
 
 app.get('/api/customers', (req, res) => {
+    console.log(new Date());
     if (!tokenIsInvalid(req, res)) {
         client.api.v1.namespaces('default')
             .configmaps('saas-customers')
             .get()
             .then((response) => {
-                console.log('/api/customers - configmap received');
+                console.log('/api/customers - configmap received:' + JSON.stringify(response.body.data) + "\n");
                 const customers = response.body.data;
                 const namespaces = Object.keys(customers);
                 const realData = namespaces.reduce((obj, namespace) => {
@@ -97,36 +98,43 @@ app.post('/api/customers', (req, res) => {
     }
 })
 
+app.get('/api/sql-instances', (req, res) => {
+    console.log(new Date());
+    if (!tokenIsInvalid(req, res)) {
+        authorize(function(authClient) {
+          var request = {
+            project: 'gke-verification',
+            auth: authClient,
+          };
 
-authorize(function(authClient) {
-  var request = {
-    project: 'gke-verification',
-    auth: authClient,
-  };
+          var handlePage = function(err, response) {
+            if (err) {
+              console.error(err);
+              return res.status(500).json({ error: 'SQL Instances failed to load, blame Google' });
+            }
 
-  var handlePage = function(err, response) {
-    if (err) {
-      console.error(err);
-      return;
+            const dbInstances = response.data.items.map((instance) => instance.name);
+            res.setHeader('Content-Type', 'application/json');
+            res.send(JSON.stringify(dbInstances));
+            // console.log('d', response.data.items);
+            // if (!itemsPage) {
+            //   return;
+            // }
+            // for (var i = 0; i < itemsPage.length; i++) {
+            //   // TODO: Change code below to process each resource in `itemsPage`:
+            //   console.log(JSON.stringify(itemsPage[i], null, 2));
+            // }
+            //
+            // if (response.nextPageToken) {
+            //   request.pageToken = response.nextPageToken;
+            //   sqlAdmin.instances.list(request, handlePage);
+            // }
+          };
+
+          sqlAdmin.instances.list(request, handlePage);
+        });
     }
-
-    var itemsPage = response['items'];
-    if (!itemsPage) {
-      return;
-    }
-    for (var i = 0; i < itemsPage.length; i++) {
-      // TODO: Change code below to process each resource in `itemsPage`:
-      console.log(JSON.stringify(itemsPage[i], null, 2));
-    }
-
-    if (response.nextPageToken) {
-      request.pageToken = response.nextPageToken;
-      sqlAdmin.instances.list(request, handlePage);
-    }
-  };
-
-  sqlAdmin.instances.list(request, handlePage);
-});
+})
 
 function authorize(callback) {
   google.auth.getApplicationDefault(function(err, authClient) {

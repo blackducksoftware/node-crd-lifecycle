@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import MenuItem from '@material-ui/core/MenuItem';
 import TextField from '@material-ui/core/TextField';
@@ -8,6 +9,7 @@ import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
 import FormLabel from '@material-ui/core/FormLabel';
+import ToastMsg from './ToastMsg';
 // import deepPurple from '@material-ui/core/colors/purple';
 
 const styles = theme => ({
@@ -34,33 +36,54 @@ const styles = theme => ({
         marginLeft: theme.spacing.unit,
     },
     formControl: {
-      margin: theme.spacing.unit * 3,
+        margin: theme.spacing.unit * 3,
     },
     group: {
-      margin: `${theme.spacing.unit}px 0`,
-      flexDirection: 'row'
+        margin: `${theme.spacing.unit}px 0`,
+        flexDirection: 'row'
+    },
+    close: {
+        width: theme.spacing.unit * 4,
+        height: theme.spacing.unit * 4,
     },
 });
 
+// TODO: move toast state up into app? decouple form/toast state?
 const initialState = {
     namespace: '',
     flavor: 'small',
     hubTimeout: '2',
-    dockerRegistry: 'docker.io',
-    dockerRepo: 'blackducksoftware',
-    hubVersion: '4.6.1',
+    dockerRegistry: 'gcr.io',
+    dockerRepo: 'gke-verification/blackducksoftware',
+    hubVersion: '4.7.0',
+    dbPrototype: '',
     status: 'pending',
-    token: ''
+    token: '',
+    toastMsgOpen: false,
+    toastMsgText: '',
+    toastMsgVariant: 'success'
 };
 
 class StagingForm extends Component {
     constructor(props) {
         super(props);
+        // TODO: spread initialState + toast msg so toast not overwritten on poll
         this.state = initialState;
 
+        // TODO: React docs - transform pkg, don't need to bind
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
         this.resetForm = this.resetForm.bind(this);
+        this.handleToastMsgClick = this.handleToastMsgClick.bind(this);
+        this.validateNamespace = this.validateNamespace.bind(this);
+    }
+
+    componentDidMount() {
+        this.namespaceField.addEventListener('blur', this.validateNamespace);
+    }
+
+    componentWillUnmount() {
+        this.namespaceField.removeEventListener('blur', this.validateNamespace)
     }
 
     handleChange(event) {
@@ -69,12 +92,32 @@ class StagingForm extends Component {
     }
 
     resetForm() {
-        this.setState(initialState);
+        const {
+            toastMsgOpen,
+            toastMsgText,
+            toastMsgVariant,
+            ...rest
+        } = initialState;
+        this.setState(rest);
     }
+
+    handleToastMsgClick(event, reason) {
+        if (reason === 'clickaway') {
+            return;
+        }
+
+        this.setState({ toastMsgOpen: false });
+    };
 
     async handleSubmit(event) {
         event.preventDefault();
-        const { token, ...formData } = this.state;
+        const {
+            token,
+            toastMsgOpen,
+            toastMsgText,
+            toastMsgVariant,
+            ...formData
+        } = this.state;
         const response = await fetch('/api/customers', {
             method: 'POST',
             credentials: 'same-origin',
@@ -86,14 +129,37 @@ class StagingForm extends Component {
             body: JSON.stringify(formData),
         });
         if (response.status === 200) {
-            console.log('/api/customers - POST success');
-            this.props.addCustomer(formData);
+            this.setState({
+                toastMsgOpen: true,
+                toastMsgVariant: 'success',
+                toastMsgText: 'Hub instance submitted! IP address will appear shortly'
+            });
+            this.props.addInstance(formData);
             this.resetForm()
+            return;
         }
+
+        this.setState({
+            toastMsgOpen: true,
+            toastMsgVariant: 'error',
+            toastMsgText: 'Invalid token, check your token and try again'
+        });
+    }
+
+    validateNamespace(event) {
+        const regExp = RegExp(/[A-Z`~,<>;':"/[\]|{}()=_+!@#$%^&*]+/)
+        const invalidNamespace = regExp.test(event.target.value);
+        this.props.setNamespaceStatus(invalidNamespace);
     }
 
     render() {
-        const { classes } = this.props;
+        const {
+            classes,
+            invalidNamespace,
+            kubeSizes,
+            expirationHours,
+            dbInstances
+        } = this.props;
         // const primary = deepPurple[200];
 
         return (
@@ -112,6 +178,10 @@ class StagingForm extends Component {
                         value={this.state.namespace}
                         onChange={this.handleChange}
                         margin="normal"
+                        autoFocus
+                        inputRef={el => this.namespaceField = el}
+                        error={invalidNamespace}
+                        helperText="Lowercase letters, numbers, and hyphens only"
                     />
                     <div className={classes.root}>
                         <FormControl component="fieldset" className={classes.formControl}>
@@ -123,7 +193,7 @@ class StagingForm extends Component {
                                 value={this.state.flavor}
                                 onChange={this.handleChange}
                             >
-                                {this.props.kubeSizes.map((size) => {
+                                {kubeSizes.map((size) => {
                                     return (
                                         <FormControlLabel
                                             key={`flavor-${size}`}
@@ -137,9 +207,9 @@ class StagingForm extends Component {
                         </FormControl>
                     </div>
                     <TextField
+                        select
                         id="hubTimeout"
                         name="hubTimeout"
-                        select
                         label="Expiration (hrs)"
                         className={classes.textField}
                         value={this.state.hubTimeout}
@@ -149,10 +219,9 @@ class StagingForm extends Component {
                                 className: classes.menu,
                             },
                         }}
-                        helperText="Please select desired length of HUB instance"
                         margin="normal"
                     >
-                        {this.props.expirationHours.map((hour) => {
+                        {expirationHours.map((hour) => {
                             return (
                                 <MenuItem key={`expiration-${hour}`} value={hour}>
                                     {hour}
@@ -188,6 +257,29 @@ class StagingForm extends Component {
                         margin="normal"
                     />
                     <TextField
+                        select
+                        id="dbPrototype"
+                        name="dbPrototype"
+                        label="Database"
+                        className={classes.textField}
+                        value={this.state.dbPrototype}
+                        onChange={this.handleChange}
+                        SelectProps={{
+                            MenuProps: {
+                                className: classes.menu,
+                            },
+                        }}
+                        margin="normal"
+                    >
+                        {dbInstances.map((instance) => {
+                            return (
+                                <MenuItem key={`instance-${instance}`} value={instance}>
+                                    {instance}
+                                </MenuItem>
+                            );
+                        })}
+                    </TextField>
+                    <TextField
                         id="token"
                         name="token"
                         label="Token"
@@ -203,9 +295,16 @@ class StagingForm extends Component {
                         type='submit'
                         color="primary"
                         onClick={this.handleSubmit}
+                        disabled={invalidNamespace}
                     >
                         Submit
                     </Button>
+                    <ToastMsg
+                        message={this.state.toastMsgText}
+                        variant={this.state.toastMsgVariant}
+                        toastMsgOpen={this.state.toastMsgOpen}
+                        onClose={this.handleToastMsgClick}
+                    />
                 </form>
             </div>
         );
@@ -213,3 +312,11 @@ class StagingForm extends Component {
 }
 
 export default withStyles(styles)(StagingForm);
+
+StagingForm.propTypes = {
+    addInstance: PropTypes.func,
+    dbInstances: PropTypes.arrayOf(PropTypes.string),
+    expirationHours: PropTypes.arrayOf(PropTypes.string),
+    invalidNamespace: PropTypes.bool,
+    kubeSizes: PropTypes.arrayOf(PropTypes.string)
+}
