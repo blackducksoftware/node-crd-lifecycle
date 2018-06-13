@@ -74,10 +74,11 @@ class StagingForm extends Component {
         this.handleSubmit = this.handleSubmit.bind(this);
         this.resetForm = this.resetForm.bind(this);
         this.handleToastMsgClick = this.handleToastMsgClick.bind(this);
+        this.validateNamespace = this.validateNamespace.bind(this);
     }
 
     componentDidMount() {
-        this.namespaceField.addEventListener('blur', (event) => this.validateNamespace(event));
+        this.namespaceField.addEventListener('blur', this.validateNamespace);
     }
 
     componentWillUnmount() {
