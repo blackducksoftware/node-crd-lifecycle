@@ -46,14 +46,18 @@ app.get('/api/customers', (req, res) => {
             .configmaps('saas-customers')
             .get()
             .then((response) => {
-                console.log('/api/customers - configmap received:' + JSON.stringify(response.body.data) + "\n");
                 const customers = response.body.data;
-                const namespaces = Object.keys(customers);
-                const realData = namespaces.reduce((obj, namespace) => {
-                    const stagingData = JSON.parse(customers[namespace]);
-                    obj[namespace] = stagingData;
-                    return obj;
-                }, {})
+                console.log('/api/customers - configmap received:' + JSON.stringify(customers) + "\n");
+                const realData = {};
+                for (var namespace in customers) {
+                  const hub = JSON.parse(customers[namespace]);
+                  // TODO actually get these values from somewhere
+                  hub["totalContainerRestartCount"] = 0;
+                  hub["podsNotRunningCount"] = 0
+                  hub["badEventsCount"] = 0
+                  // end TODO
+                  realData[namespace] = hub;
+                }
                 res.setHeader('Content-Type', 'application/json');
                 res.send(JSON.stringify(realData));
             })
