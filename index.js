@@ -3,6 +3,7 @@ const app = express();
 const path = require('path');
 const Client = require('kubernetes-client').Client;
 const config = require('kubernetes-client').config;
+const got = require('got');
 const { google } = require('googleapis');
 const sqlAdmin = google.sqladmin('v1beta4');
 require('dotenv').config()
@@ -39,30 +40,65 @@ app.get('/', (req, res) => {
 
 app.listen(3001, () => console.log('Node server running on port 3001'))
 
+function getConfigMap() {
+    return client.api.v1.namespaces('default')
+        .configmaps('saas-customers')
+        .get()
+}
+
+function getConfigMapMock() {
+  return new Promise(function(resolve, reject) {
+    const obj = {
+      "an": '{"namespace": "an", "flavor": "small", "hubTimeout": "2", "dockerRegistry": "gcr.io", "dockerRepo": "gke-verification/blackducksoftware","hubVersion": "4.7.0","status": "processing","ip": ""}'
+    }
+    const wrapper = {'body': {'data': obj}};
+    resolve(wrapper);
+  })
+}
+
+function getHubHealthReport() {
+//    For local dev, may want to try:
+//    return got('http://35.226.186.70:15472/latestreport')
+//    TODO: set this through a config map
+    return got('http://cn-crd-controller:15472/latestreport')
+}
+
+function sum(nums) {
+  return nums.reduce((b, a) => b + a, 0);
+}
+
+function mergeCustomersAndHealthReport(customers, healthReport) {
+    const realData = {};
+    for (var namespace in customers) {
+        const hub = JSON.parse(customers[namespace]);
+        if (namespace in healthReport.Hubs) {
+            const derived = healthReport.Hubs[namespace].Derived;
+            hub["totalContainerRestartCount"] = sum(Object.keys(derived.ContainerRestarts).map((k) => derived.ContainerRestarts[k]));
+            hub["podsNotRunningCount"] = sum(Object.keys(derived.PodStatuses).map((k) => derived.PodStatuses[k].length));
+            hub["badEventsCount"] = derived.Events.length;
+        }
+        realData[namespace] = hub;
+    }
+    return realData
+}
+
 app.get('/api/customers', (req, res) => {
     console.log(new Date());
     if (!tokenIsInvalid(req, res)) {
-        client.api.v1.namespaces('default')
-            .configmaps('saas-customers')
-            .get()
-            .then((response) => {
-                const customers = response.body.data;
+        Promise.all([getConfigMap(), getHubHealthReport()])
+            .then((array) => {
+              const customers = array[0].body.data;
+                const hubHealth = JSON.parse(array[1].body);
+                console.log("hub health -- " + JSON.stringify(Object.keys(hubHealth)));
                 console.log('/api/customers - configmap received:' + JSON.stringify(customers) + "\n");
-                const realData = {};
-                for (var namespace in customers) {
-                  const hub = JSON.parse(customers[namespace]);
-                  // TODO actually get these values from somewhere
-                  hub["totalContainerRestartCount"] = 0;
-                  hub["podsNotRunningCount"] = 0
-                  hub["badEventsCount"] = 0
-                  // end TODO
-                  realData[namespace] = hub;
-                }
+                const realData = mergeCustomersAndHealthReport(customers, hubHealth);
                 res.setHeader('Content-Type', 'application/json');
                 res.send(JSON.stringify(realData));
             })
             .catch((error) => {
                 console.log(error);
+                res.status(500);
+                res.send(error.toString());
             })
     }
 })
@@ -98,6 +134,8 @@ app.post('/api/customers', (req, res) => {
             })
             .catch((error) => {
                 console.log(error);
+                res.status(500);
+                res.send(error.toString());
             })
     }
 })
