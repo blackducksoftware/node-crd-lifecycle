@@ -47,9 +47,21 @@ function getConfigMap() {
 }
 
 function getConfigMapMock() {
+  const string = '{"namespace": "an", "flavor": "small", "hubTimeout": "2", "dockerRegistry": "gcr.io", "dockerRepo": "gke-verification/blackducksoftware","hubVersion": "4.7.0","status": "processing","ip": ""}';
   return new Promise(function(resolve, reject) {
     const obj = {
-      "an": '{"namespace": "an", "flavor": "small", "hubTimeout": "2", "dockerRegistry": "gcr.io", "dockerRepo": "gke-verification/blackducksoftware","hubVersion": "4.7.0","status": "processing","ip": ""}'
+      "mf-opssight-hub-4-6-2": string,
+      "gcr-47-benfix": string,
+      "please-dont-delete": string,
+      "dave-opssight-demo": string,
+      "an": string,
+      "um": string,
+      "senthil-please-dont-delete-seriously-not-joking": string,
+      "randy": string,
+      "test": string,
+      "mf-opssight-4-7": string,
+      "small-2": string,
+      "mf-opssight-4-7-hub": string
     }
     const wrapper = {'body': {'data': obj}};
     resolve(wrapper);
@@ -67,6 +79,27 @@ function sum(nums) {
   return nums.reduce((b, a) => b + a, 0);
 }
 
+function getPodsNotRunningCount(podStatuses) {
+  const counts = Object.keys(podStatuses)
+      .map(function (k) {
+          if (k === "Running") {
+            return 0;
+          }
+          return podStatuses[k].length;
+      });
+  return sum(counts);
+}
+
+function getBadEventsCount(events) {
+  let total = 0;
+  for (var key in events) {
+    if (key !== "Running") {
+      total += events[key];
+    }
+  }
+  return total;
+}
+
 function mergeCustomersAndHealthReport(customers, healthReport) {
     const realData = {};
     for (var namespace in customers) {
@@ -74,8 +107,8 @@ function mergeCustomersAndHealthReport(customers, healthReport) {
         if (namespace in healthReport.Hubs) {
             const derived = healthReport.Hubs[namespace].Derived;
             hub["totalContainerRestartCount"] = sum(Object.keys(derived.ContainerRestarts).map((k) => derived.ContainerRestarts[k]));
-            hub["podsNotRunningCount"] = sum(Object.keys(derived.PodStatuses).map((k) => derived.PodStatuses[k].length));
-            hub["badEventsCount"] = derived.Events.length;
+            hub["podsNotRunningCount"] = getPodsNotRunningCount(derived.PodStatuses);
+            hub["badEventsCount"] = getBadEventsCount(derived.Events.length);
         }
         realData[namespace] = hub;
     }
