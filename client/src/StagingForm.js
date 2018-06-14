@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import classnames from 'classnames';
 import { withStyles } from '@material-ui/core/styles';
 import MenuItem from '@material-ui/core/MenuItem';
 import TextField from '@material-ui/core/TextField';
@@ -12,6 +13,7 @@ import FormLabel from '@material-ui/core/FormLabel';
 import ToastMsg from './ToastMsg';
 // import deepPurple from '@material-ui/core/colors/purple';
 
+//TODO: figure out child selectors/dynamic styles
 const styles = theme => ({
     container: {
         display: 'flex',
@@ -25,6 +27,17 @@ const styles = theme => ({
         marginLeft: theme.spacing.unit,
         marginRight: theme.spacing.unit,
         width: 500,
+    },
+    singleRowFields: {
+        display: 'flex'
+    },
+    singleRowFieldLeft: {
+        marginRight: theme.spacing.unit / 2,
+        flex: 1
+    },
+    singleRowFieldRight: {
+        marginLeft: theme.spacing.unit / 2,
+        flex: 1
     },
     menu: {
         width: 200,
@@ -206,29 +219,40 @@ class StagingForm extends Component {
                             </RadioGroup>
                         </FormControl>
                     </div>
-                    <TextField
-                        select
-                        id="hubTimeout"
-                        name="hubTimeout"
-                        label="Expiration (hrs)"
-                        className={classes.textField}
-                        value={this.state.hubTimeout}
-                        onChange={this.handleChange}
-                        SelectProps={{
-                            MenuProps: {
-                                className: classes.menu,
-                            },
-                        }}
-                        margin="normal"
-                    >
-                        {expirationHours.map((hour) => {
-                            return (
-                                <MenuItem key={`expiration-${hour}`} value={hour}>
-                                    {hour}
-                                </MenuItem>
-                            );
-                        })}
-                    </TextField>
+                    <div className={classnames(classes.singleRowFields, classes.textField)}>
+                        <TextField
+                            select
+                            id="hubTimeout"
+                            name="hubTimeout"
+                            label="Expiration (hrs)"
+                            className={classes.singleRowFieldLeft}
+                            value={this.state.hubTimeout}
+                            onChange={this.handleChange}
+                            SelectProps={{
+                                MenuProps: {
+                                    className: classes.menu,
+                                },
+                            }}
+                            margin="normal"
+                        >
+                            {expirationHours.map((hour) => {
+                                return (
+                                    <MenuItem key={`expiration-${hour}`} value={hour}>
+                                        {hour}
+                                    </MenuItem>
+                                );
+                            })}
+                        </TextField>
+                        <TextField
+                            id="hubVersion"
+                            name="hubVersion"
+                            label="Hub Version"
+                            className={classes.singleRowFieldRight}
+                            value={this.state.hubVersion}
+                            onChange={this.handleChange}
+                            margin="normal"
+                        />
+                    </div>
                     <TextField
                         id="dockerRegistry"
                         name="dockerRegistry"
@@ -244,15 +268,6 @@ class StagingForm extends Component {
                         label="Docker Repo"
                         className={classes.textField}
                         value={this.state.dockerRepo}
-                        onChange={this.handleChange}
-                        margin="normal"
-                    />
-                    <TextField
-                        id="hubVersion"
-                        name="hubVersion"
-                        label="Hub Version"
-                        className={classes.textField}
-                        value={this.state.hubVersion}
                         onChange={this.handleChange}
                         margin="normal"
                     />

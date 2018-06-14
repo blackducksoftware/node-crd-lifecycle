@@ -47,7 +47,7 @@ function getConfigMap() {
 }
 
 function getConfigMapMock() {
-  const string = '{"namespace": "an", "flavor": "small", "hubTimeout": "2", "dockerRegistry": "gcr.io", "dockerRepo": "gke-verification/blackducksoftware","hubVersion": "4.7.0","status": "processing","ip": ""}';
+  const string = '{"namespace": "an", "flavor": "small", "hubTimeout": "never", "dockerRegistry": "gcr.io", "dockerRepo": "gke-verification/blackducksoftware","hubVersion": "4.7.0","status": "processing","ip": ""}';
   return new Promise(function(resolve, reject) {
     const obj = {
       "mf-opssight-hub-4-6-2": string,
@@ -69,9 +69,9 @@ function getConfigMapMock() {
 }
 
 function getHubHealthReport() {
-//    For local dev, may want to try:
-//    return got('http://35.226.186.70:15472/latestreport')
-//    TODO: set this through a config map
+   // For local dev, may want to try:
+   // return got('http://35.226.186.70:15472/latestreport')
+   // TODO: set this through a config map
     return got('http://cn-crd-controller:15472/latestreport')
 }
 
@@ -90,6 +90,7 @@ function getPodsNotRunningCount(podStatuses) {
   return sum(counts);
 }
 
+//TODO: use reduce
 function getBadEventsCount(events) {
   let total = 0;
   for (var key in events) {
@@ -100,6 +101,7 @@ function getBadEventsCount(events) {
   return total;
 }
 
+//TODO: use reduce
 function mergeCustomersAndHealthReport(customers, healthReport) {
     const realData = {};
     for (var namespace in customers) {
@@ -120,7 +122,7 @@ app.get('/api/customers', (req, res) => {
     if (!tokenIsInvalid(req, res)) {
         Promise.all([getConfigMap(), getHubHealthReport()])
             .then((array) => {
-              const customers = array[0].body.data;
+                const customers = array[0].body.data;
                 const hubHealth = JSON.parse(array[1].body);
                 console.log("hub health -- " + JSON.stringify(Object.keys(hubHealth)));
                 console.log('/api/customers - configmap received:' + JSON.stringify(customers) + "\n");
@@ -191,15 +193,7 @@ app.get('/api/sql-instances', (req, res) => {
             const dbInstances = response.data.items.map((instance) => instance.name);
             res.setHeader('Content-Type', 'application/json');
             res.send(JSON.stringify(dbInstances));
-            // console.log('d', response.data.items);
-            // if (!itemsPage) {
-            //   return;
-            // }
-            // for (var i = 0; i < itemsPage.length; i++) {
-            //   // TODO: Change code below to process each resource in `itemsPage`:
-            //   console.log(JSON.stringify(itemsPage[i], null, 2));
-            // }
-            //
+            //TODO: check for multiple pages
             // if (response.nextPageToken) {
             //   request.pageToken = response.nextPageToken;
             //   sqlAdmin.instances.list(request, handlePage);

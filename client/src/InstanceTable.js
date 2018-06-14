@@ -12,7 +12,7 @@ const styles = theme => ({
     marginTop: theme.spacing.unit * 3,
     overflowX: 'auto',
     margin: '0 auto',
-    width: '80%'
+    width: '90%'
   },
   table: {
     minWidth: 700,
@@ -36,27 +36,30 @@ const InstanceTable = ({ customers, removeCustomer, classes }) => {
                     <TableRow>
                         <TableCell>Namespace</TableCell>
                         <TableCell>Size</TableCell>
-                        <TableCell>Expiration</TableCell>
+                        <TableCell numeric>Expiration</TableCell>
                         <TableCell>Hub Version</TableCell>
                         <TableCell>Database</TableCell>
-                        <TableCell>Status</TableCell>
                         <TableCell>IP Address</TableCell>
+                        <TableCell numeric>Container Restarts</TableCell>
+                        <TableCell numeric>Failed Pods</TableCell>
+                        <TableCell numeric>Critical Events</TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
                     {namespaces.map((namespace) => {
                         const customer = customers[namespace];
+                        const ip = customer.ip ? customer.ip : customer.status
                         return (
                             <TableRow key={namespace}>
-                                <TableCell component="th" scope="row">
-                                    {customer.namespace}
-                                </TableCell>
+                                <TableCell>{customer.namespace}</TableCell>
                                 <TableCell>{customer.flavor}</TableCell>
-                                <TableCell>{customer.hubTimeout}</TableCell>
+                                <TableCell numeric>{customer.hubTimeout}</TableCell>
                                 <TableCell>{customer.hubVersion}</TableCell>
                                 <TableCell>{customer.dbPrototype}</TableCell>
-                                <TableCell>{customer.status}</TableCell>
-                                <TableCell>{customer.ip || '-'}</TableCell>
+                                <TableCell>{ip}</TableCell>
+                                <TableCell numeric>{customer.totalContainerRestartCount}</TableCell>
+                                <TableCell numeric>{customer.podsNotRunningCount}</TableCell>
+                                <TableCell numeric>{customer.badEventsCount}</TableCell>
                             </TableRow>
                         );
                     })}
