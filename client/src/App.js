@@ -3,6 +3,7 @@ import bdsLogo from './icon.ico';
 import './App.css';
 import StagingForm from './StagingForm';
 import InstanceTable from './InstanceTable';
+import ToastMsg from './ToastMsg';
 
 class App extends Component {
     constructor(props) {
@@ -27,13 +28,18 @@ class App extends Component {
             // TODO: change all customer references to instances
             customers: {},
             dbInstances: [],
-            invalidNamespace: false
+            invalidNamespace: false,
+            toastMsgOpen: false,
+            toastMsgText: '',
+            toastMsgVariant: 'success'
         };
 
         this.fetchCustomers = this.fetchCustomers.bind(this);
         this.addInstance = this.addInstance.bind(this);
         this.setNamespaceStatus = this.setNamespaceStatus.bind(this);
         this.fetchDbInstances = this.fetchDbInstances.bind(this);
+        this.setToastStatus = this.setToastStatus.bind(this);
+        this.handleToastMsgClick = this.handleToastMsgClick.bind(this);
     }
 
     componentDidMount() {
@@ -67,23 +73,6 @@ class App extends Component {
         }
     }
 
-    addInstance(customer) {
-        this.setState({
-            customers: {
-                ...this.state.customers,
-                [customer.namespace] : {
-                    ...customer
-                }
-            }
-        });
-    }
-
-    setNamespaceStatus(invalidNamespace) {
-        if (this.state.invalidNamespace !== invalidNamespace) {
-            this.setState({ invalidNamespace });
-        }
-    }
-
     async fetchDbInstances() {
         const response = await fetch('/api/sql-instances', {
             credentials: 'same-origin',
@@ -103,6 +92,39 @@ class App extends Component {
         }
     }
 
+    addInstance(customer) {
+        this.setState({
+            customers: {
+                ...this.state.customers,
+                [customer.namespace] : {
+                    ...customer
+                }
+            }
+        });
+    }
+
+    setNamespaceStatus(invalidNamespace) {
+        if (this.state.invalidNamespace !== invalidNamespace) {
+            this.setState({ invalidNamespace });
+        }
+    }
+
+    setToastStatus({ toastMsgOpen, toastMsgVariant, toastMsgText }) {
+        this.setState({
+            toastMsgOpen,
+            toastMsgVariant,
+            toastMsgText
+        })
+    }
+
+    handleToastMsgClick(event, reason) {
+        if (reason === 'clickaway') {
+            return;
+        }
+
+        this.setState({ toastMsgOpen: false });
+    };
+
     render() {
         return (
             <div className="App">
@@ -117,10 +139,17 @@ class App extends Component {
                     setNamespaceStatus={this.setNamespaceStatus}
                     invalidNamespace={this.state.invalidNamespace}
                     dbInstances={this.state.dbInstances}
+                    setToastStatus={this.setToastStatus}
                 />
                 <div className='paper-container'>
                     <InstanceTable customers={this.state.customers} removeCustomer={this.removeCustomer} />
                 </div>
+                <ToastMsg
+                    message={this.state.toastMsgText}
+                    variant={this.state.toastMsgVariant}
+                    toastMsgOpen={this.state.toastMsgOpen}
+                    onClose={this.handleToastMsgClick}
+                />
             </div>
         );
     }

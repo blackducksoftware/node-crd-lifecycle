@@ -10,7 +10,6 @@ import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
 import FormLabel from '@material-ui/core/FormLabel';
-import ToastMsg from './ToastMsg';
 // import deepPurple from '@material-ui/core/colors/purple';
 
 //TODO: figure out child selectors/dynamic styles
@@ -61,7 +60,6 @@ const styles = theme => ({
     },
 });
 
-// TODO: move toast state up into app? decouple form/toast state?
 const initialState = {
     namespace: '',
     flavor: 'small',
@@ -72,23 +70,20 @@ const initialState = {
     dbPrototype: '',
     status: 'pending',
     token: '',
-    toastMsgOpen: false,
-    toastMsgText: '',
-    toastMsgVariant: 'success'
+    emptyFormFields: true
 };
 
 class StagingForm extends Component {
     constructor(props) {
         super(props);
-        // TODO: spread initialState + toast msg so toast not overwritten on poll
         this.state = initialState;
 
         // TODO: React docs - transform pkg, don't need to bind
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
         this.resetForm = this.resetForm.bind(this);
-        this.handleToastMsgClick = this.handleToastMsgClick.bind(this);
         this.validateNamespace = this.validateNamespace.bind(this);
+        this.emptyFormFields = this.emptyFormFields.bind(this);
     }
 
     componentDidMount() {
@@ -101,34 +96,20 @@ class StagingForm extends Component {
 
     handleChange(event) {
         const stateKey = event.target.name;
-        this.setState({ [stateKey]: event.target.value });
+        this.setState({ [stateKey]: event.target.value }, () => {
+            this.emptyFormFields();
+        });
     }
 
     resetForm() {
-        const {
-            toastMsgOpen,
-            toastMsgText,
-            toastMsgVariant,
-            ...rest
-        } = initialState;
-        this.setState(rest);
+        this.setState(initialState)
     }
-
-    handleToastMsgClick(event, reason) {
-        if (reason === 'clickaway') {
-            return;
-        }
-
-        this.setState({ toastMsgOpen: false });
-    };
 
     async handleSubmit(event) {
         event.preventDefault();
         const {
             token,
-            toastMsgOpen,
-            toastMsgText,
-            toastMsgVariant,
+            emptyFormFields,
             ...formData
         } = this.state;
         const response = await fetch('/api/customers', {
@@ -142,7 +123,7 @@ class StagingForm extends Component {
             body: JSON.stringify(formData),
         });
         if (response.status === 200) {
-            this.setState({
+            this.props.setToastStatus({
                 toastMsgOpen: true,
                 toastMsgVariant: 'success',
                 toastMsgText: 'Hub instance submitted! IP address will appear shortly'
@@ -152,7 +133,7 @@ class StagingForm extends Component {
             return;
         }
 
-        this.setState({
+        this.props.setToastStatus({
             toastMsgOpen: true,
             toastMsgVariant: 'error',
             toastMsgText: 'Invalid token, check your token and try again'
@@ -163,6 +144,20 @@ class StagingForm extends Component {
         const regExp = RegExp(/[A-Z`~,<>;':"/[\]|{}()=_+!@#$%^&*]+/)
         const invalidNamespace = regExp.test(event.target.value);
         this.props.setNamespaceStatus(invalidNamespace);
+    }
+
+    emptyFormFields() {
+        const {
+            flavor,
+            hubTimeout,
+            status,
+            emptyFormFields : emptyFields,
+            ...textFields
+        } = this.state;
+        const emptyFormFields = Object.keys(textFields).some((field) => !Boolean(textFields[field]));
+        if (emptyFormFields !== this.state.emptyFormFields) {
+            this.setState({ emptyFormFields });
+        }
     }
 
     render() {
@@ -310,16 +305,10 @@ class StagingForm extends Component {
                         type='submit'
                         color="primary"
                         onClick={this.handleSubmit}
-                        disabled={invalidNamespace}
+                        disabled={this.state.emptyFormFields || invalidNamespace}
                     >
                         Submit
                     </Button>
-                    <ToastMsg
-                        message={this.state.toastMsgText}
-                        variant={this.state.toastMsgVariant}
-                        toastMsgOpen={this.state.toastMsgOpen}
-                        onClose={this.handleToastMsgClick}
-                    />
                 </form>
             </div>
         );

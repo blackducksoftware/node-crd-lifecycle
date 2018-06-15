@@ -72,7 +72,7 @@ function getHubHealthReport() {
    // For local dev, may want to try:
    // return got('http://35.226.186.70:15472/latestreport')
    // TODO: set this through a config map
-    return got('http://cn-crd-controller:15472/latestreport')
+   return got('http://cn-crd-controller:15472/latestreport')
 }
 
 function sum(nums) {
