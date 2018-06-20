@@ -33,8 +33,7 @@ app.listen(3001, () => console.log('Node server running on port 3001'))
 const baseURL = "http://35.226.186.70:15472";
 //const baseURL = "http://cn-crd-controller:15472";
 const urls = {
-    "createHub": baseURL + "/hub",
-    "deleteHub": baseURL + "/hub",
+    "crudHub": `${baseUrl}/hub`,
     "getModel": baseURL + "/model"
 };
 
@@ -43,11 +42,11 @@ function getModel() {
 }
 
 function createHub(body) {
-    return got.post(urls.createHub, body);
+    return got.post(urls.crudHub, body);
 }
 
 function deleteHub(body) {
-    return got.delete(urls.deleteHub, body);
+    return got.delete(urls.crudHub, body);
 }
 
 // business logic
