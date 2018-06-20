@@ -1,28 +1,14 @@
 const express = require('express');
 const app = express();
 const path = require('path');
-const Client = require('kubernetes-client').Client;
-const config = require('kubernetes-client').config;
 const got = require('got');
 const { google } = require('googleapis');
 const sqlAdmin = google.sqladmin('v1beta4');
 require('dotenv').config()
-let client;
-
-// try in-cluster config, otherwise fall back to local minikube config
-try {
-    client = new Client({ config: config.getInCluster() });
-    const loadConfig = async () => {
-        await client.loadSpec();
-    }
-    loadConfig();
-    console.log('Kube Config: in cluster');
-} catch (e) {
-    client = new Client({ config: config.fromKubeconfig(), version: '1.9' });
-    console.log('Kube Config: out of cluster');
-}
 
 const token = process.env.TOKEN;
+
+// http server setup
 
 app.use(express.json());
 app.use('/static', express.static(path.join(__dirname, 'client', 'build', 'static')));
@@ -40,40 +26,30 @@ app.get('/', (req, res) => {
 
 app.listen(3001, () => console.log('Node server running on port 3001'))
 
-function getConfigMap() {
-    return client.api.v1.namespaces('default')
-        .configmaps('saas-customers')
-        .get()
+
+// http client
+
+// TODO read from config map
+const baseURL = "http://35.226.186.70:15472";
+//const baseURL = "http://cn-crd-controller:15472";
+const urls = {
+    "crudHub": `${baseUrl}/hub`,
+    "getModel": baseURL + "/model"
+};
+
+function getModel() {
+    return got(urls.getModel);
 }
 
-function getConfigMapMock() {
-  const string = '{"namespace": "an", "flavor": "small", "hubTimeout": "never", "dockerRegistry": "gcr.io", "dockerRepo": "gke-verification/blackducksoftware","hubVersion": "4.7.0","status": "processing","ip": ""}';
-  return new Promise(function(resolve, reject) {
-    const obj = {
-      "mf-opssight-hub-4-6-2": string,
-      "gcr-47-benfix": string,
-      "please-dont-delete": string,
-      "dave-opssight-demo": string,
-      "an": string,
-      "um": string,
-      "senthil-please-dont-delete-seriously-not-joking": string,
-      "randy": string,
-      "test": string,
-      "mf-opssight-4-7": string,
-      "small-2": string,
-      "mf-opssight-4-7-hub": string
-    }
-    const wrapper = {'body': {'data': obj}};
-    resolve(wrapper);
-  })
+function createHub(body) {
+    return got.post(urls.crudHub, body);
 }
 
-function getHubHealthReport() {
-   // For local dev, may want to try:
-   // return got('http://35.226.186.70:15472/latestreport')
-   // TODO: set this through a config map
-   return got('http://cn-crd-controller:15472/latestreport')
+function deleteHub(body) {
+    return got.delete(urls.crudHub, body);
 }
+
+// business logic
 
 function sum(nums) {
   return nums.reduce((b, a) => b + a, 0);
@@ -117,18 +93,18 @@ function mergeCustomersAndHealthReport(customers, healthReport) {
     return realData
 }
 
+// more routes for http server
+
 app.get('/api/customers', (req, res) => {
     console.log(new Date());
     if (!tokenIsInvalid(req, res)) {
-        Promise.all([getConfigMap(), getHubHealthReport()])
-            .then((array) => {
-                const customers = array[0].body.data;
-                const hubHealth = JSON.parse(array[1].body);
-                console.log("hub health -- " + JSON.stringify(Object.keys(hubHealth)));
-                console.log('/api/customers - configmap received:' + JSON.stringify(customers) + "\n");
+        getModel()
+            .then((resp) => {
+                console.log("model -- " + JSON.stringify(resp.body));
                 const realData = mergeCustomersAndHealthReport(customers, hubHealth);
                 res.setHeader('Content-Type', 'application/json');
-                res.send(JSON.stringify(realData));
+                res.status(200);
+                res.send(JSON.stringify(resp.body));
             })
             .catch((error) => {
                 console.log(error);
@@ -140,32 +116,9 @@ app.get('/api/customers', (req, res) => {
 
 app.post('/api/customers', (req, res) => {
     if (!tokenIsInvalid(req, res)) {
-        const { namespace } = req.body;
-        const jsonData = JSON.stringify(req.body);
-
-        client.api.v1.namespaces('default')
-            .configmaps('saas-customers')
-            .get()
+        createHub(req.body)
             .then((resp) => {
-                console.log('/api/customers - configmap received');
-                const { body } = resp;
-                const { data } = body;
-                const newBody = {
-                    ...body,
-                    'data': {
-                        ...data,
-                        [namespace]: `${jsonData}`
-                    }
-                };
-                client.api.v1.namespaces('default')
-                    .configmaps('saas-customers')
-                    .patch({
-                        body: newBody
-                    })
-                    .then(() => {
-                        console.log('/api/customers - configmap PATCH success');
-                        res.sendStatus(200);
-                    })
+              res.status(200)
             })
             .catch((error) => {
                 console.log(error);
@@ -175,6 +128,7 @@ app.post('/api/customers', (req, res) => {
     }
 })
 
+// TODO could/should these be pulled in from cn-crd-controller?
 app.get('/api/sql-instances', (req, res) => {
     console.log(new Date());
     if (!tokenIsInvalid(req, res)) {
