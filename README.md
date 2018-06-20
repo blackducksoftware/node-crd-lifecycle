@@ -10,7 +10,7 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Install
 ```
-git@github.com:blackducksoftware/node-crd-lifecycle.git &&
+git clone git@github.com:blackducksoftware/node-crd-lifecycle.git &&
 npm install &&
 cd client &&
 npm install
