@@ -19,8 +19,8 @@ const styles = theme => ({
   },
 });
 
-const InstanceTable = ({ customers, removeCustomer, classes }) => {
-    const namespaces = Object.keys(customers);
+const InstanceTable = ({ instances, classes }) => {
+    const namespaces = Object.keys(instances);
     if (!namespaces.length) {
         return(
             <div>
@@ -47,19 +47,19 @@ const InstanceTable = ({ customers, removeCustomer, classes }) => {
                 </TableHead>
                 <TableBody>
                     {namespaces.map((namespace) => {
-                        const customer = customers[namespace];
-                        const ip = customer.ip ? customer.ip : customer.status
+                        const instance = instances[namespace];
+                        const ip = instance.ip ? instance.ip : instance.status
                         return (
                             <TableRow key={namespace}>
-                                <TableCell>{customer.namespace}</TableCell>
-                                <TableCell>{customer.flavor}</TableCell>
-                                <TableCell numeric>{customer.hubTimeout}</TableCell>
-                                <TableCell>{customer.hubVersion}</TableCell>
-                                <TableCell>{customer.dbPrototype}</TableCell>
+                                <TableCell>{instance.namespace}</TableCell>
+                                <TableCell>{instance.flavor}</TableCell>
+                                <TableCell numeric>{instance.hubTimeout}</TableCell>
+                                <TableCell>{instance.hubVersion}</TableCell>
+                                <TableCell>{instance.dbPrototype}</TableCell>
                                 <TableCell>{ip}</TableCell>
-                                <TableCell numeric>{customer.totalContainerRestartCount}</TableCell>
-                                <TableCell numeric>{customer.podsNotRunningCount}</TableCell>
-                                <TableCell numeric>{customer.badEventsCount}</TableCell>
+                                <TableCell numeric>{instance.totalContainerRestartCount}</TableCell>
+                                <TableCell numeric>{instance.podsNotRunningCount}</TableCell>
+                                <TableCell numeric>{instance.badEventsCount}</TableCell>
                             </TableRow>
                         );
                     })}

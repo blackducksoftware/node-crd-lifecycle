@@ -112,7 +112,7 @@ class StagingForm extends Component {
             emptyFormFields,
             ...formData
         } = this.state;
-        const response = await fetch('/api/customers', {
+        const response = await fetch('/api/instances', {
             method: 'POST',
             credentials: 'same-origin',
             headers: {

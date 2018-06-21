@@ -30,11 +30,11 @@ app.listen(3001, () => console.log('Node server running on port 3001'))
 // http client
 
 // TODO read from config map
-const baseURL = "http://35.226.186.70:15472";
-//const baseURL = "http://cn-crd-controller:15472";
+const baseUrl = "http://35.226.186.70:15472";
+//const baseUrl = "http://cn-crd-controller:15472";
 const urls = {
     "crudHub": `${baseUrl}/hub`,
-    "getModel": baseURL + "/model"
+    "getModel": `${baseUrl}/model`
 };
 
 function getModel() {
@@ -78,10 +78,10 @@ function getBadEventsCount(events) {
 }
 
 //TODO: use reduce
-function mergeCustomersAndHealthReport(customers, healthReport) {
+function mergeInstancesAndHealthReport(instances, healthReport) {
     const realData = {};
-    for (var namespace in customers) {
-        const hub = JSON.parse(customers[namespace]);
+    for (var namespace in instances) {
+        const hub = JSON.parse(instances[namespace]);
         if (namespace in healthReport.Hubs) {
             const derived = healthReport.Hubs[namespace].Derived;
             hub["totalContainerRestartCount"] = sum(Object.keys(derived.ContainerRestarts).map((k) => derived.ContainerRestarts[k]));
@@ -95,13 +95,13 @@ function mergeCustomersAndHealthReport(customers, healthReport) {
 
 // more routes for http server
 
-app.get('/api/customers', (req, res) => {
+app.get('/api/instances', (req, res) => {
     console.log(new Date());
     if (!tokenIsInvalid(req, res)) {
         getModel()
             .then((resp) => {
                 console.log("model -- " + JSON.stringify(resp.body));
-                const realData = mergeCustomersAndHealthReport(customers, hubHealth);
+                const realData = mergeInstancesAndHealthReport(instances, hubHealth);
                 res.setHeader('Content-Type', 'application/json');
                 res.status(200);
                 res.send(JSON.stringify(resp.body));
@@ -114,7 +114,7 @@ app.get('/api/customers', (req, res) => {
     }
 })
 
-app.post('/api/customers', (req, res) => {
+app.post('/api/instances', (req, res) => {
     if (!tokenIsInvalid(req, res)) {
         createHub(req.body)
             .then((resp) => {

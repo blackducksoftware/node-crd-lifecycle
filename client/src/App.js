@@ -25,8 +25,7 @@ class App extends Component {
                 '128',
                 'never'
             ],
-            // TODO: change all customer references to instances
-            customers: {},
+            instances: {},
             dbInstances: [],
             invalidNamespace: false,
             toastMsgOpen: false,
@@ -34,7 +33,7 @@ class App extends Component {
             toastMsgVariant: 'success'
         };
 
-        this.fetchCustomers = this.fetchCustomers.bind(this);
+        this.fetchInstances = this.fetchInstances.bind(this);
         this.addInstance = this.addInstance.bind(this);
         this.setNamespaceStatus = this.setNamespaceStatus.bind(this);
         this.fetchDbInstances = this.fetchDbInstances.bind(this);
@@ -43,19 +42,19 @@ class App extends Component {
     }
 
     componentDidMount() {
-        this.pollCustomers = setInterval(() => {
-            return this.fetchCustomers();
+        this.pollInstances = setInterval(() => {
+            return this.fetchInstances();
         }, 60000);
-        this.fetchCustomers();
+        this.fetchInstances();
         this.fetchDbInstances();
     }
 
     componentWillUnmount() {
-        clearInterval(this.pollCustomers);
+        clearInterval(this.pollInstances);
     }
 
-    async fetchCustomers() {
-        const response = await fetch('/api/customers', {
+    async fetchInstances() {
+        const response = await fetch('/api/instances', {
             credentials: 'same-origin',
             headers: {
                 'Content-Type': 'application/json',
@@ -66,9 +65,9 @@ class App extends Component {
         });
         if (response.status === 200) {
             console.log('Customer data fetched');
-            const customers = await response.json();
+            const instances = await response.json();
             this.setState({
-                customers
+                instances
             })
         }
     }
@@ -92,12 +91,12 @@ class App extends Component {
         }
     }
 
-    addInstance(customer) {
+    addInstance(instance) {
         this.setState({
-            customers: {
-                ...this.state.customers,
-                [customer.namespace] : {
-                    ...customer
+            instances: {
+                ...this.state.instances,
+                [instance.namespace] : {
+                    ...instance
                 }
             }
         });
@@ -142,7 +141,7 @@ class App extends Component {
                     setToastStatus={this.setToastStatus}
                 />
                 <div className='paper-container'>
-                    <InstanceTable customers={this.state.customers} removeCustomer={this.removeCustomer} />
+                    <InstanceTable instances={this.state.instances} />
                 </div>
                 <ToastMsg
                     message={this.state.toastMsgText}
