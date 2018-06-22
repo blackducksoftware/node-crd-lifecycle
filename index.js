@@ -77,6 +77,34 @@ function getBadEventsCount(events) {
   return total;
 }
 
+function flattenHubModel(model) {
+    const derived = model. ???
+    return {
+        "namespace": model.namespace,
+        "flavor": model.flavor,
+        "hubTimeout": model.hubTimeout,
+        "dockerRegistry": model.dockerRegistry,
+        "dockerRepo": model.dockerRepo,
+        "hubVersion": model.hubVersion,
+        "status": model.status,
+        "ip": model.ip,
+        "dbPrototype": model.dbPrototype
+        "totalContainerRestartCount": sum(Object.keys(derived.ContainerRestarts).map((k) => derived.ContainerRestarts[k])),
+        "podsNotRunningCount": getPodsNotRunningCount(derived.PodStatuses),
+        "badEventsCount": getBadEventsCount(derived.Events.length)
+    }
+}
+
+function flattenModel(model) {
+  const body = {'nodes': model.Nodes};
+  const hubs = {};
+  for (hub in model.Hubs) {
+    hubs[hub] = flattenHubModel(model.Hubs[hub]);
+  }
+  body.hubs = hubs;
+  return body;
+}
+
 // more routes for http server
 
 app.get('/api/instances', (req, res) => {
@@ -87,7 +115,9 @@ app.get('/api/instances', (req, res) => {
                 res.setHeader('Content-Type', 'application/json');
                 res.status(200);
                 // res.send(JSON.stringify(resp.body));
-                res.send(resp.body);
+                // TODO verify that resp.body is a json object, and that
+                // res.send accepts a json object
+                res.send(flattenModel(resp.body));
             })
             .catch((error) => {
                 console.log(error);
@@ -102,6 +132,20 @@ app.post('/api/instances', (req, res) => {
         createHub(req.body)
             .then((resp) => {
               res.status(200)
+            })
+            .catch((error) => {
+                console.log(error);
+                res.status(500);
+                res.send(error.toString());
+            })
+    }
+})
+
+app.delete('/api/instances', (req, res) => {
+    if (!tokenIsInvalid(req, res)) {
+        deleteHub(req.body)
+            .then((resp) => {
+                res.status(200)
             })
             .catch((error) => {
                 console.log(error);
