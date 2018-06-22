@@ -2,9 +2,9 @@ const express = require('express');
 const app = express();
 const path = require('path');
 const got = require('got');
+require('dotenv').config()
 const { google } = require('googleapis');
 const sqlAdmin = google.sqladmin('v1beta4');
-require('dotenv').config()
 
 const token = process.env.TOKEN;
 
