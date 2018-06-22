@@ -56,7 +56,9 @@ const InstanceTable = ({ instances, classes }) => {
                                 <TableCell numeric>{instance.hubTimeout}</TableCell>
                                 <TableCell>{instance.hubVersion}</TableCell>
                                 <TableCell>{instance.dbPrototype}</TableCell>
-                                <TableCell>{ip}</TableCell>
+                                <TableCell>
+                                    { instance.ip ? <a href={`https://${ip}`} target='_blank'>{instance.ip}</a> : instance.status }
+                                </TableCell>
                                 <TableCell numeric>{instance.totalContainerRestartCount}</TableCell>
                                 <TableCell numeric>{instance.podsNotRunningCount}</TableCell>
                                 <TableCell numeric>{instance.badEventsCount}</TableCell>
