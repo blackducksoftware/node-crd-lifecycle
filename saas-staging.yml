@@ -10,7 +10,6 @@ items:
     labels:
       name: node-crd-lifecycle
     name: node-crd-lifecycle-exp
-    namespace: saas-customers
   spec:
     ports:
     - port: 3001
@@ -24,7 +23,6 @@ items:
     labels:
       name: node-crd-lifecycle
     name: node-crd-lifecycle
-    namespace: saas-customers
     resourceVersion: "55059611"
     selfLink: /api/v1/namespaces/saas-customers/replicationcontrollers/node-crd-lifecycle
     uid: de3310c1-69b7-11e8-ad39-42010a80007a
