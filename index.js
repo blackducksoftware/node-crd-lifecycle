@@ -78,7 +78,7 @@ function getBadEventsCount(events) {
 }
 
 function flattenHubModel(model) {
-    const derived = model. ???
+    const derived = model.HealthReport.Derived;
     return {
         "namespace": model.namespace,
         "flavor": model.flavor,
@@ -88,7 +88,7 @@ function flattenHubModel(model) {
         "hubVersion": model.hubVersion,
         "status": model.status,
         "ip": model.ip,
-        "dbPrototype": model.dbPrototype
+        "dbPrototype": model.dbPrototype,
         "totalContainerRestartCount": sum(Object.keys(derived.ContainerRestarts).map((k) => derived.ContainerRestarts[k])),
         "podsNotRunningCount": getPodsNotRunningCount(derived.PodStatuses),
         "badEventsCount": getBadEventsCount(derived.Events.length)
@@ -103,6 +103,10 @@ function flattenModel(model) {
   }
   body.hubs = hubs;
   return body;
+}
+
+function getMockModel() {
+    return new Promise((resolve) => { resolve(exampleData); });
 }
 
 // more routes for http server
@@ -199,3 +203,247 @@ function authorize(callback) {
     callback(authClient);
   });
 }
+
+const exampleData = {
+  "Hubs": {
+    "abc123": {
+      "namespace": "abc123",
+      "flavor": "medium",
+      "hubTimeout": "2",
+      "dockerRegistry": "gcr.io",
+      "dockerRepo": "gke-verification/blackducksoftware",
+      "hubVersion": "4.7.0",
+      "status": "processing",
+      "ip": "",
+      "dbPrototype": "",
+      "HealthReport": {
+        "BaseURL": null,
+        "PodHealth": {},
+        "MissingPods": null,
+        "Version": null,
+        "Events": [],
+        "Errors": [
+          "unable to find hub service in namespace abc123 (found 0 services)"
+        ],
+        "Derived": {
+          "ContainerRestarts": {},
+          "PodStatuses": {},
+          "Events": {}
+        }
+      }
+    },
+    "opssight-demo": {
+      "namespace": "opssight-demo",
+      "flavor": "OpsSight",
+      "hubTimeout": "never",
+      "dockerRegistry": "gcr.io",
+      "dockerRepo": "gke-verification/blackducksoftware",
+      "hubVersion": "4.7.0",
+      "status": "completed",
+      "ip": "33.333.333.33",
+      "dbPrototype": "",
+      "HealthReport": {
+        "BaseURL": "33.333.333.33",
+        "PodHealth": {
+          "cfssl-qblhl": {
+            "Status": "Running",
+            "ContainerReports": {
+              "hub-cfssl": {
+                "Restarts": 0,
+                "Status": "running"
+              }
+            }
+          },
+          "hub-authentication-d6hkb": {
+            "Status": "Running",
+            "ContainerReports": {
+              "cloudsql-proxy": {
+                "Restarts": 0,
+                "Status": "running"
+              },
+              "hub-authentication": {
+                "Restarts": 0,
+                "Status": "running"
+              }
+            }
+          },
+          "hub-scan-4lkvf": {
+            "Status": "Running",
+            "ContainerReports": {
+              "cloudsql-proxy": {
+                "Restarts": 0,
+                "Status": "running"
+              },
+              "hub-scan": {
+                "Restarts": 0,
+                "Status": "running"
+              }
+            }
+          },
+          "hub-scan-q8zj2": {
+            "Status": "Running",
+            "ContainerReports": {
+              "cloudsql-proxy": {
+                "Restarts": 0,
+                "Status": "running"
+              },
+              "hub-scan": {
+                "Restarts": 0,
+                "Status": "running"
+              }
+            }
+          },
+          "hub-scan-wvmj6": {
+            "Status": "Running",
+            "ContainerReports": {
+              "cloudsql-proxy": {
+                "Restarts": 0,
+                "Status": "running"
+              },
+              "hub-scan": {
+                "Restarts": 0,
+                "Status": "running"
+              }
+            }
+          },
+          "jobrunner-4lqfv": {
+            "Status": "Running",
+            "ContainerReports": {
+              "cloudsql-proxy": {
+                "Restarts": 0,
+                "Status": "running"
+              },
+              "jobrunner": {
+                "Restarts": 0,
+                "Status": "running"
+              }
+            }
+          },
+          "jobrunner-8wzvf": {
+            "Status": "Running",
+            "ContainerReports": {
+              "cloudsql-proxy": {
+                "Restarts": 0,
+                "Status": "running"
+              },
+              "jobrunner": {
+                "Restarts": 0,
+                "Status": "running"
+              }
+            }
+          },
+          "jobrunner-z94ts": {
+            "Status": "Running",
+            "ContainerReports": {
+              "cloudsql-proxy": {
+                "Restarts": 0,
+                "Status": "running"
+              },
+              "jobrunner": {
+                "Restarts": 0,
+                "Status": "running"
+              }
+            }
+          },
+          "registration-rctxb": {
+            "Status": "Running",
+            "ContainerReports": {
+              "registration": {
+                "Restarts": 0,
+                "Status": "running"
+              }
+            }
+          },
+          "solr-tfckv": {
+            "Status": "Running",
+            "ContainerReports": {
+              "solr": {
+                "Restarts": 0,
+                "Status": "running"
+              }
+            }
+          },
+          "webapp-logstash-thsq9": {
+            "Status": "Running",
+            "ContainerReports": {
+              "cloudsql-proxy": {
+                "Restarts": 0,
+                "Status": "running"
+              },
+              "logstash": {
+                "Restarts": 0,
+                "Status": "running"
+              },
+              "webapp": {
+                "Restarts": 10,
+                "Status": "running"
+              }
+            }
+          },
+          "webserver-nkxd2": {
+            "Status": "Running",
+            "ContainerReports": {
+              "webserver": {
+                "Restarts": 0,
+                "Status": "running"
+              }
+            }
+          },
+          "zookeeper-mcz4p": {
+            "Status": "Running",
+            "ContainerReports": {
+              "zookeeper": {
+                "Restarts": 0,
+                "Status": "running"
+              }
+            }
+          }
+        },
+        "MissingPods": [],
+        "Version": "4.7.0",
+        "Events": [],
+        "Errors": [],
+        "Derived": {
+          "ContainerRestarts": {
+            "cfssl-qblhl": 0,
+            "hub-authentication-d6hkb": 0,
+            "hub-scan-4lkvf": 0,
+            "hub-scan-q8zj2": 0,
+            "hub-scan-wvmj6": 0,
+            "jobrunner-4lqfv": 0,
+            "jobrunner-8wzvf": 0,
+            "jobrunner-z94ts": 0,
+            "registration-rctxb": 0,
+            "solr-tfckv": 0,
+            "webapp-logstash-thsq9": 10,
+            "webserver-nkxd2": 0,
+            "zookeeper-mcz4p": 0
+          },
+          "PodStatuses": {
+            "Running": [
+              "jobrunner-z94ts",
+              "webserver-nkxd2",
+              "hub-scan-q8zj2",
+              "hub-authentication-d6hkb",
+              "hub-scan-4lkvf",
+              "hub-scan-wvmj6",
+              "jobrunner-4lqfv",
+              "jobrunner-8wzvf",
+              "registration-rctxb",
+              "solr-tfckv",
+              "cfssl-qblhl",
+              "zookeeper-mcz4p",
+              "webapp-logstash-thsq9"
+            ]
+          },
+          "Events": {}
+        }
+      }
+    }
+  },
+  "Nodes": {
+    "gke-large-hub-cluster-big-nodes-0207a27c-0cjs": "Ready",
+    "gke-large-hub-cluster-big-nodes-e7f9f0d7-2f7c": "Ready",
+    "gke-large-hub-cluster-pool-1-a5c5d12b-hh1m": "Ready"
+  }
+};
