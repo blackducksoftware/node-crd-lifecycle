@@ -6,7 +6,7 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites
 * Install [Minikube](https://github.com/kubernetes/minikube) for spinning up a local Kubernetes cluster.
-* This application uses the [Google Cloud SQL API](https://cloud.google.com/sql/docs/mysql/admin-api/) for provisioning in-cluster databases. Once authenticated, add your JSON file to `/var/secrets/google`.
+* This application uses the [Google Cloud SQL API](https://cloud.google.com/sql/docs/mysql/admin-api/) for provisioning in-cluster databases. Create a service account in Google Cloud and save your JSON file to `/var/secrets/google`, then create an `.env` file and add: `GOOGLE_APPLICATION_CREDENTIALS="/var/secrets/google/[filename].json"`
 
 ### Install
 ```
