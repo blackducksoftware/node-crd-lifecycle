@@ -43,7 +43,7 @@ function getModel() {
 }
 
 function createHub(body) {
-    return got.post(urls.crudHub, body, { json: true });
+    return got.post(urls.crudHub, { json: true, body });
 }
 
 function deleteHub(body) {
