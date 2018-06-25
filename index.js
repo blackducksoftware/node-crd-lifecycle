@@ -15,6 +15,7 @@ app.use('/static', express.static(path.join(__dirname, 'client', 'build', 'stati
 
 const tokenIsInvalid = (req, res) => {
     const rgbToken = req.get('rgb-token');
+    console.log("server token is " + token + ";  request token is " + rgbToken);
     if (!rgbToken || rgbToken !== token) {
         return res.status(403).json({ error: 'Token is either null or invalid' });
     }
