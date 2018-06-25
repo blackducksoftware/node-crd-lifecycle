@@ -43,10 +43,7 @@ items:
           secret:
             secretName: gcloud-key
         containers:
-        - env:
-          - name: TOKEN
-###            value: <REPLACE_THIS> ###
-          image: gcr.io/gke-verification/github-blackducksoftware-node-crd-lifecycle:master
+        - image: gcr.io/gke-verification/github-blackducksoftware-node-crd-lifecycle:master
           imagePullPolicy: Always
           name: nrd-crd-lifecycle
           ports:
@@ -61,6 +58,8 @@ items:
           env:
           - name: "GOOGLE_APPLICATION_CREDENTIALS"
             value: "/var/secrets/google/key.json"
+          - name: TOKEN
+            value: <REPLACE_THIS>
         dnsPolicy: ClusterFirst
         restartPolicy: Always
         schedulerName: default-scheduler
