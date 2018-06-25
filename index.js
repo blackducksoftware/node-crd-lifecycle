@@ -31,7 +31,7 @@ app.listen(3001, () => console.log('Node server running on port 3001'))
 // http client
 
 // TODO read from config map
-const baseUrl = "http://35.202.246.217:15472";
+const baseUrl = "http://35.202.46.218:15472";
 //const baseUrl = "http://cn-crd-controller:15472";
 const urls = {
     "crudHub": `${baseUrl}/hub`,
@@ -57,14 +57,14 @@ function sum(nums) {
 }
 
 function getPodsNotRunningCount(podStatuses) {
-  const counts = Object.keys(podStatuses)
-      .map(function (k) {
-          if (k === "Running") {
-            return 0;
-          }
-          return podStatuses[k].length;
-      });
-  return sum(counts);
+    const counts = Object.keys(podStatuses)
+        .map(function (k) {
+            if (k === "Running") {
+                return 0;
+            }
+            return podStatuses[k].length;
+        });
+    return sum(counts);
 }
 
 //TODO: use reduce
@@ -102,7 +102,7 @@ app.post('/api/instances', (req, res) => {
     if (!tokenIsInvalid(req, res)) {
         createHub(req.body)
             .then((resp) => {
-              res.status(200)
+                res.status(200)
             })
             .catch((error) => {
                 console.log(error);
