@@ -102,7 +102,8 @@ app.post('/api/instances', (req, res) => {
     if (!tokenIsInvalid(req, res)) {
         createHub(req.body)
             .then((resp) => {
-                res.status(200)
+                res.status(200);
+                res.send('Hub instance created');
             })
             .catch((error) => {
                 console.log(error);
