@@ -1,3 +1,11 @@
+exports.tokenIsInvalid = ({ req, res, token }) => {
+    const rgbToken = req.get('rgb-token');
+    console.log(`Server token: ${token}; Request Token: ${rgbToken}`);
+    if (!rgbToken || rgbToken !== token) {
+        return res.status(403).json({ error: 'Token is either null or invalid' });
+    }
+}
+
 exports.formatDate = (date) => {
     const month = date.getMonth() + 1;
     const day = date.getDate();
@@ -17,3 +25,11 @@ exports.formatDate = (date) => {
 
     return `${month}/${day}/${year} - ${hours}:${minutes}${meridiem}`
 };
+
+exports.getModel = ({ httpLib, urls }) => {
+    return httpLib(urls.getModel, { json: true });
+}
+
+exports.createInstance = ({ httpLib, urls, body }) => {
+    return httpLib.post(urls.crudHub, { json: true, body });
+}

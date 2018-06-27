@@ -6,20 +6,12 @@ require('dotenv').config()
 const { google } = require('googleapis');
 const sqlAdmin = google.sqladmin('v1beta4');
 const token = process.env.TOKEN;
-const formatDate = require('./util').formatDate;
+const util = require('./util');
 
 // http server setup
 
 app.use(express.json());
 app.use('/static', express.static(path.join(__dirname, 'client', 'build', 'static')));
-
-const tokenIsInvalid = (req, res) => {
-    const rgbToken = req.get('rgb-token');
-    console.log(`Server token: ${token}; Request Token: ${rgbToken}`);
-    if (!rgbToken || rgbToken !== token) {
-        return res.status(403).json({ error: 'Token is either null or invalid' });
-    }
-}
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'));
@@ -31,7 +23,7 @@ app.listen(3001, () => console.log('Node server running on port 3001'))
 
 // TODO read from config map
 // mock url
-// const baseUrl = "http://35.202.234.89:15472";
+// const baseUrl = "http://35.192.173.23:15472";
 // prod url
 const baseUrl = "http://35.202.46.218:15472";
 //const baseUrl = "http://cn-crd-controller:15472";
@@ -40,17 +32,70 @@ const urls = {
     "getModel": `${baseUrl}/model`
 };
 
-function getModel() {
-    return got(urls.getModel, { json: true });
-}
+// routes
 
-function createHub(body) {
-    return got.post(urls.crudHub, { json: true, body });
-}
+app.get('/api/instances', (req, res) => {
+    if (!util.tokenIsInvalid({ req, res, token })) {
+        console.log('Fetch Instances:', util.formatDate(new Date()));
+        util.getModel({ httpLib: got, urls })
+            .then((resp) => {
+                res.setHeader('Content-Type', 'application/json');
+                res.send(resp.body);
+            })
+            .catch((error) => {
+                console.log(error);
+                res.status(500).json(error);
+            })
+    }
+})
 
-function deleteHub(body) {
-    return got.delete(urls.crudHub, body);
-}
+app.post('/api/instances', (req, res) => {
+    if (!util.tokenIsInvalid({ req, res, token })) {
+        util.createInstance({
+            httpLib: got,
+            urls,
+            body: req.body
+        })
+            .then((resp) => {
+                res.send('Instance created');
+            })
+            .catch((error) => {
+                console.log(error);
+                res.status(500).json(error);
+            })
+    }
+})
+
+// TODO could/should these be pulled in from cn-crd-controller?
+app.get('/api/sql-instances', (req, res) => {
+    if (!util.tokenIsInvalid({ req, res, token })) {
+        console.log('Authorize Cloud SQL:', util.formatDate(new Date()));
+        authorize(function(authClient) {
+          var request = {
+            project: 'gke-verification',
+            auth: authClient,
+          };
+
+          var handlePage = function(err, response) {
+            if (err) {
+              console.error(err);
+              return res.status(500).json({ error: 'SQL Instances failed to load, blame Google' });
+            }
+
+            const dbInstances = response.data.items.map((instance) => instance.name);
+            res.setHeader('Content-Type', 'application/json');
+            res.send(JSON.stringify(dbInstances));
+            //TODO: check for multiple pages
+            // if (response.nextPageToken) {
+            //   request.pageToken = response.nextPageToken;
+            //   sqlAdmin.instances.list(request, handlePage);
+            // }
+          };
+
+          sqlAdmin.instances.list(request, handlePage);
+        });
+    }
+})
 
 // business logic
 
@@ -79,72 +124,6 @@ function getBadEventsCount(events) {
   }
   return total;
 }
-
-// more routes for http server
-
-app.get('/api/instances', (req, res) => {
-    if (!tokenIsInvalid(req, res)) {
-        console.log('Fetch Instances:', formatDate(new Date()));
-        getModel()
-            .then((resp) => {
-                res.setHeader('Content-Type', 'application/json');
-                res.status(200);
-                // res.send(JSON.stringify(resp.body));
-                res.send(resp.body);
-            })
-            .catch((error) => {
-                console.log(error);
-                res.status(500);
-                res.send(error.toString());
-            })
-    }
-})
-
-app.post('/api/instances', (req, res) => {
-    if (!tokenIsInvalid(req, res)) {
-        createHub(req.body)
-            .then((resp) => {
-                res.status(200);
-                res.send('Hub instance created');
-            })
-            .catch((error) => {
-                console.log(error);
-                res.status(500);
-                res.send(error.toString());
-            })
-    }
-})
-
-// TODO could/should these be pulled in from cn-crd-controller?
-app.get('/api/sql-instances', (req, res) => {
-    if (!tokenIsInvalid(req, res)) {
-        console.log('Authorize Cloud SQL:', formatDate(new Date()));
-        authorize(function(authClient) {
-          var request = {
-            project: 'gke-verification',
-            auth: authClient,
-          };
-
-          var handlePage = function(err, response) {
-            if (err) {
-              console.error(err);
-              return res.status(500).json({ error: 'SQL Instances failed to load, blame Google' });
-            }
-
-            const dbInstances = response.data.items.map((instance) => instance.name);
-            res.setHeader('Content-Type', 'application/json');
-            res.send(JSON.stringify(dbInstances));
-            //TODO: check for multiple pages
-            // if (response.nextPageToken) {
-            //   request.pageToken = response.nextPageToken;
-            //   sqlAdmin.instances.list(request, handlePage);
-            // }
-          };
-
-          sqlAdmin.instances.list(request, handlePage);
-        });
-    }
-})
 
 function authorize(callback) {
   google.auth.getApplicationDefault(function(err, authClient) {

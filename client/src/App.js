@@ -36,7 +36,7 @@ class App extends Component {
         this.fetchInstances = this.fetchInstances.bind(this);
         this.addInstance = this.addInstance.bind(this);
         this.setNamespaceStatus = this.setNamespaceStatus.bind(this);
-        this.fetchDbInstances = this.fetchDbInstances.bind(this);
+        this.fetchDatabases = this.fetchDatabases.bind(this);
         this.setToastStatus = this.setToastStatus.bind(this);
         this.handleToastMsgClick = this.handleToastMsgClick.bind(this);
     }
@@ -46,7 +46,7 @@ class App extends Component {
             return this.fetchInstances();
         }, 60000);
         this.fetchInstances();
-        this.fetchDbInstances();
+        this.fetchDatabases();
     }
 
     componentWillUnmount() {
@@ -73,7 +73,7 @@ class App extends Component {
         }
     }
 
-    async fetchDbInstances() {
+    async fetchDatabases() {
         const response = await fetch('/api/sql-instances', {
             credentials: 'same-origin',
             headers: {
