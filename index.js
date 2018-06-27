@@ -5,8 +5,8 @@ const got = require('got');
 require('dotenv').config()
 const { google } = require('googleapis');
 const sqlAdmin = google.sqladmin('v1beta4');
-
 const token = process.env.TOKEN;
+const formatDate = require('./util').formatDate;
 
 // http server setup
 
@@ -15,7 +15,7 @@ app.use('/static', express.static(path.join(__dirname, 'client', 'build', 'stati
 
 const tokenIsInvalid = (req, res) => {
     const rgbToken = req.get('rgb-token');
-    console.log("server token is " + token + ";  request token is " + rgbToken);
+    console.log(`Server token: ${token}; Request Token: ${rgbToken}`);
     if (!rgbToken || rgbToken !== token) {
         return res.status(403).json({ error: 'Token is either null or invalid' });
     }
@@ -27,10 +27,12 @@ app.get('/', (req, res) => {
 
 app.listen(3001, () => console.log('Node server running on port 3001'))
 
-
 // http client
 
 // TODO read from config map
+// mock url
+// const baseUrl = "http://35.202.234.89:15472";
+// prod url
 const baseUrl = "http://35.202.46.218:15472";
 //const baseUrl = "http://cn-crd-controller:15472";
 const urls = {
@@ -81,8 +83,8 @@ function getBadEventsCount(events) {
 // more routes for http server
 
 app.get('/api/instances', (req, res) => {
-    console.log(new Date());
     if (!tokenIsInvalid(req, res)) {
+        console.log('Fetch Instances:', formatDate(new Date()));
         getModel()
             .then((resp) => {
                 res.setHeader('Content-Type', 'application/json');
@@ -115,8 +117,8 @@ app.post('/api/instances', (req, res) => {
 
 // TODO could/should these be pulled in from cn-crd-controller?
 app.get('/api/sql-instances', (req, res) => {
-    console.log(new Date());
     if (!tokenIsInvalid(req, res)) {
+        console.log('Authorize Cloud SQL:', formatDate(new Date()));
         authorize(function(authClient) {
           var request = {
             project: 'gke-verification',
