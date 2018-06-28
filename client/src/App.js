@@ -65,8 +65,7 @@ class App extends Component {
         });
         if (response.status === 200) {
             console.log('Customer data fetched');
-            const allData = await response.json();
-            const { Hubs : instances } = allData;
+            const { instances } = await response.json();
             this.setState({
                 instances
             });

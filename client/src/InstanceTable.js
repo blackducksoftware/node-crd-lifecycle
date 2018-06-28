@@ -60,7 +60,7 @@ const InstanceTable = ({ instances, classes }) => {
                                     { instance.ip ? <a href={`https://${ip}`} target='_blank'>{instance.ip}</a> : instance.status }
                                 </TableCell>
                                 <TableCell numeric>{instance.totalContainerRestartCount}</TableCell>
-                                <TableCell numeric>{instance.podsNotRunningCount}</TableCell>
+                                <TableCell numeric>{instance.unhealthyPodsCount}</TableCell>
                                 <TableCell numeric>{instance.badEventsCount}</TableCell>
                             </TableRow>
                         );

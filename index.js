@@ -38,9 +38,10 @@ app.get('/api/instances', (req, res) => {
     if (!util.tokenIsInvalid({ req, res, token })) {
         console.log('Fetch Instances:', util.formatDate(new Date()));
         util.getModel({ httpLib: got, urls })
-            .then((resp) => {
+            .then((model) => {
                 res.setHeader('Content-Type', 'application/json');
-                res.send(resp.body);
+                const instances = util.formatInstanceData(model);
+                res.send({ instances });
             })
             .catch((error) => {
                 console.log(error);
@@ -96,23 +97,6 @@ app.get('/api/sql-instances', (req, res) => {
         });
     }
 })
-
-// business logic
-
-function sum(nums) {
-  return nums.reduce((b, a) => b + a, 0);
-}
-
-function getPodsNotRunningCount(podStatuses) {
-    const counts = Object.keys(podStatuses)
-        .map(function (k) {
-            if (k === "Running") {
-                return 0;
-            }
-            return podStatuses[k].length;
-        });
-    return sum(counts);
-}
 
 //TODO: use reduce
 function getBadEventsCount(events) {
