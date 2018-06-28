@@ -36,9 +36,9 @@ const urls = {
 
 app.get('/api/instances', (req, res) => {
     if (!util.tokenIsInvalid({ req, res, token })) {
-        console.log('Fetch Instances:', util.formatDate(new Date()));
         util.getModel({ httpLib: got, urls })
             .then((model) => {
+                console.log('Fetch Instances:', util.formatDate(new Date()));
                 res.setHeader('Content-Type', 'application/json');
                 const instances = util.formatInstanceData(model);
                 res.send({ instances });
@@ -48,7 +48,7 @@ app.get('/api/instances', (req, res) => {
                 res.status(500).json(error);
             })
     }
-})
+});
 
 app.post('/api/instances', (req, res) => {
     if (!util.tokenIsInvalid({ req, res, token })) {
@@ -65,12 +65,27 @@ app.post('/api/instances', (req, res) => {
                 res.status(500).json(error);
             })
     }
-})
+});
+
+app.delete('/api/instances', (req, res) => {
+    util.deleteInstance({
+        httpLib: got,
+        urls,
+        body: req.body
+    })
+        .then((resp) => {
+            console.log('Instance deleted:', util.formatDate(new Date()));
+            res.send('Instance deleted')
+        })
+        .catch((error) => {
+            console.log(error);
+            res.status(500).json(error);
+        })
+});
 
 // TODO could/should these be pulled in from cn-crd-controller?
 app.get('/api/sql-instances', (req, res) => {
     if (!util.tokenIsInvalid({ req, res, token })) {
-        console.log('Authorize Cloud SQL:', util.formatDate(new Date()));
         authorize(function(authClient) {
           var request = {
             project: 'gke-verification',
@@ -83,6 +98,7 @@ app.get('/api/sql-instances', (req, res) => {
               return res.status(500).json({ error: 'SQL Instances failed to load, blame Google' });
             }
 
+            console.log('Authorize Cloud SQL:', util.formatDate(new Date()));
             const dbInstances = response.data.items.map((instance) => instance.name);
             res.setHeader('Content-Type', 'application/json');
             res.send(JSON.stringify(dbInstances));
@@ -98,27 +114,16 @@ app.get('/api/sql-instances', (req, res) => {
     }
 })
 
-//TODO: use reduce
-function getBadEventsCount(events) {
-  let total = 0;
-  for (var key in events) {
-    if (key !== "Running") {
-      total += events[key];
-    }
-  }
-  return total;
-}
-
-function authorize(callback) {
-  google.auth.getApplicationDefault(function(err, authClient) {
-    if (err) {
-      console.error('authentication failed: ', err);
-      return;
-    }
-    if (authClient.createScopedRequired && authClient.createScopedRequired()) {
-      var scopes = ['https://www.googleapis.com/auth/cloud-platform'];
-      authClient = authClient.createScoped(scopes);
-    }
-    callback(authClient);
-  });
-}
+const authorize = (callback) => {
+    google.auth.getApplicationDefault(function(err, authClient) {
+        if (err) {
+            console.error('authentication failed: ', err);
+            return;
+        }
+        if (authClient.createScopedRequired && authClient.createScopedRequired()) {
+            var scopes = ['https://www.googleapis.com/auth/cloud-platform'];
+            authClient = authClient.createScoped(scopes);
+        }
+        callback(authClient);
+    });
+};

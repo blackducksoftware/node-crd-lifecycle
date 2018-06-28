@@ -67,7 +67,7 @@ const initialState = {
     dockerRegistry: 'gcr.io',
     dockerRepo: 'gke-verification/blackducksoftware',
     hubVersion: '4.7.0',
-    dbPrototype: 'default',
+    dbPrototype: 'empty',
     status: 'pending',
     token: '',
     emptyFormFields: true
@@ -110,8 +110,10 @@ class StagingForm extends Component {
         const {
             token,
             emptyFormFields,
+            dbPrototype,
             ...formData
         } = this.state;
+        const database = dbPrototype === 'empty' ? '' : dbPrototype;
         const response = await fetch('/api/instances', {
             method: 'POST',
             credentials: 'same-origin',
@@ -120,8 +122,9 @@ class StagingForm extends Component {
                 'rgb-token': token
             },
             mode: 'same-origin',
-            body: JSON.stringify(formData),
+            body: JSON.stringify({ ...formData, dbPrototype: database }),
         });
+
         if (response.status === 200) {
             this.props.setToastStatus({
                 toastMsgOpen: true,

@@ -35,6 +35,8 @@ class App extends Component {
 
         this.fetchInstances = this.fetchInstances.bind(this);
         this.addInstance = this.addInstance.bind(this);
+        this.removeInstance = this.removeInstance.bind(this);
+        this.handleDelete = this.handleDelete.bind(this);
         this.setNamespaceStatus = this.setNamespaceStatus.bind(this);
         this.fetchDatabases = this.fetchDatabases.bind(this);
         this.setToastStatus = this.setToastStatus.bind(this);
@@ -53,6 +55,7 @@ class App extends Component {
         clearInterval(this.pollInstances);
     }
 
+    //TODO: remove hardcoded tokens
     async fetchInstances() {
         const response = await fetch('/api/instances', {
             credentials: 'same-origin',
@@ -87,11 +90,42 @@ class App extends Component {
             const dbInstances = await response.json();
             this.setState({
                 dbInstances : [
-                    'default',
+                    'empty',
                     ...dbInstances
                 ]
             })
         }
+    }
+
+    async handleDelete(namespace) {
+        const response = await fetch('/api/instances', {
+            method: 'DELETE',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json',
+                'rgb-token': 'RGB'
+            },
+            mode: 'same-origin',
+            body: JSON.stringify({ namespace }),
+        });
+
+        if (response.status === 200) {
+            this.setToastStatus({
+                toastMsgOpen: true,
+                toastMsgVariant: 'success',
+                toastMsgText: 'Hub instance deleted!'
+            });
+            this.removeInstance(namespace);
+            console.log('Deleted instance');
+            return;
+        }
+
+        console.log(response.status);
+        this.setToastStatus({
+            toastMsgOpen: true,
+            toastMsgVariant: 'error',
+            toastMsgText: 'Hub instance not deleted, check your network settings and try again'
+        });
     }
 
     addInstance(instance) {
@@ -101,6 +135,15 @@ class App extends Component {
                 [instance.namespace] : {
                     ...instance
                 }
+            }
+        });
+    }
+
+    removeInstance(namespace) {
+        const { [namespace] : instance, ...rest } = this.state.instances
+        this.setState({
+            instances: {
+                ...rest
             }
         });
     }
@@ -144,7 +187,7 @@ class App extends Component {
                     setToastStatus={this.setToastStatus}
                 />
                 <div className='paper-container'>
-                    <InstanceTable instances={this.state.instances} />
+                    <InstanceTable instances={this.state.instances} handleDelete={this.handleDelete} />
                 </div>
                 <ToastMsg
                     message={this.state.toastMsgText}

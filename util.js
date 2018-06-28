@@ -4,7 +4,7 @@ exports.tokenIsInvalid = ({ req, res, token }) => {
     if (!rgbToken || rgbToken !== token) {
         return res.status(403).json({ error: 'Token is either null or invalid' });
     }
-}
+};
 
 exports.formatDate = (date) => {
     const month = date.getMonth() + 1;
@@ -28,12 +28,17 @@ exports.formatDate = (date) => {
 
 exports.getModel = ({ httpLib, urls }) => {
     return httpLib(urls.getModel, { json: true });
-}
+};
 
 exports.createInstance = ({ httpLib, urls, body }) => {
     return httpLib.post(urls.crudHub, { json: true, body });
-}
+};
 
+exports.deleteInstance = ({ httpLib, urls, body }) => {
+    return httpLib.delete(urls.crudHub, { json: true, body });
+};
+
+//TODO: remove Object.entries()
 exports.formatInstanceData = (resp) => {
     const instanceEntries = Object.entries(resp.body.Hubs);
     return instanceEntries.reduce((obj, instance, index, array) => {
@@ -41,7 +46,7 @@ exports.formatInstanceData = (resp) => {
         const totalContainerRestartCount = getTotalContainerRestarts(HealthReport);
         const unhealthyPodsCount = getUnhealthyPods(HealthReport);
         const badEventsCount = getBadEvents(HealthReport);
-        obj[index] = {
+        obj[instance[0]] = {
             ...rest,
             totalContainerRestartCount,
             unhealthyPodsCount,
@@ -49,7 +54,7 @@ exports.formatInstanceData = (resp) => {
         }
         return obj;
     }, {});
-}
+};
 
 const getTotalContainerRestarts = (data) => {
     const restartEntries = Object.entries(data.Derived.ContainerRestarts);
