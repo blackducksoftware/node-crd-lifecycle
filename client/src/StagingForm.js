@@ -141,8 +141,8 @@ class StagingForm extends Component {
     }
 
     validateNamespace(event) {
-        const regExp = RegExp(/[A-Z`~,<>;':"/[\]|{}()=_+!@#$%^&*]+/)
-        const invalidNamespace = regExp.test(event.target.value);
+        const regExp = RegExp(/^[a-z0-9]([-a-z0-9]*[a-z0-9])?$/);
+        const invalidNamespace = !regExp.test(event.target.value);
         this.props.setNamespaceStatus(invalidNamespace);
     }
 
@@ -189,7 +189,7 @@ class StagingForm extends Component {
                         autoFocus
                         inputRef={el => this.namespaceField = el}
                         error={invalidNamespace}
-                        helperText="Lowercase letters, numbers, and hyphens only"
+                        helperText="Lowercase letters, numbers, and hyphens only. Cannot start or end with hypens."
                     />
                     <div className={classes.root}>
                         <FormControl component="fieldset" className={classes.formControl}>
