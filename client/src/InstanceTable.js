@@ -55,7 +55,7 @@ const InstanceTable = ({ instances, classes }) => {
                                 <TableCell>{instance.flavor}</TableCell>
                                 <TableCell numeric>{instance.hubTimeout}</TableCell>
                                 <TableCell>{instance.hubVersion}</TableCell>
-                                <TableCell>{instance.dbPrototype}</TableCell>
+                                <TableCell>{instance.dbPrototype || 'default'}</TableCell>
                                 <TableCell>
                                     { instance.ip ? <a href={`https://${ip}`} target='_blank'>{instance.ip}</a> : instance.status }
                                 </TableCell>

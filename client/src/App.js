@@ -86,7 +86,10 @@ class App extends Component {
             console.log('DB Instances fetched');
             const dbInstances = await response.json();
             this.setState({
-                dbInstances
+                dbInstances : [
+                    'default',
+                    ...dbInstances
+                ]
             })
         }
     }

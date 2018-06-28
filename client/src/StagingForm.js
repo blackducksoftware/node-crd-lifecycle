@@ -67,7 +67,7 @@ const initialState = {
     dockerRegistry: 'gcr.io',
     dockerRepo: 'gke-verification/blackducksoftware',
     hubVersion: '4.7.0',
-    dbPrototype: '',
+    dbPrototype: 'default',
     status: 'pending',
     token: '',
     emptyFormFields: true
