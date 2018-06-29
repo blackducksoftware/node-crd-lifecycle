@@ -175,7 +175,7 @@ class App extends Component {
             <div className="App">
                 <header className="App-header">
                     <img src={bdsLogo} className="App-logo" alt="logo" />
-                    <h1 className="App-title">Hub SaaS Staging</h1>
+                    <h1 className="App-title">Welcome to Kipp 2x: Internal SaaS.</h1>
                 </header>
                 <StagingForm
                     kubeSizes={this.state.kubeSizes}
