@@ -51,7 +51,7 @@ const InstanceTable = ({ instances, classes, handleDelete }) => {
                 <TableBody>
                     {namespaces.map((namespace) => {
                         const instance = instances[namespace];
-                        const ip = instance.ip ? instance.ip : instance.status;
+                        const ip = instance.ip || instance.status;
                         const onTrashIconClick = () => {
                             return handleDelete(instance.namespace);
                         };

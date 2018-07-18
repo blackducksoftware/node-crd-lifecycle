@@ -22,11 +22,7 @@ app.listen(3001, () => console.log('Node server running on port 3001'))
 // http client
 
 // TODO read from config map
-// mock url
-// const baseUrl = "http://35.192.173.23:15472";
-// prod url
 const baseUrl = "http://35.202.46.218:15472";
-//const baseUrl = "http://cn-crd-controller:15472";
 const urls = {
     "crudHub": `${baseUrl}/hub`,
     "getModel": `${baseUrl}/model`

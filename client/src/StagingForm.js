@@ -10,9 +10,7 @@ import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
 import FormLabel from '@material-ui/core/FormLabel';
-// import deepPurple from '@material-ui/core/colors/purple';
 
-//TODO: figure out child selectors/dynamic styles
 const styles = theme => ({
     container: {
         display: 'flex',
@@ -77,13 +75,6 @@ class StagingForm extends Component {
     constructor(props) {
         super(props);
         this.state = initialState;
-
-        // TODO: React docs - transform pkg, don't need to bind
-        this.handleChange = this.handleChange.bind(this);
-        this.handleSubmit = this.handleSubmit.bind(this);
-        this.resetForm = this.resetForm.bind(this);
-        this.validateNamespace = this.validateNamespace.bind(this);
-        this.emptyFormFields = this.emptyFormFields.bind(this);
     }
 
     componentDidMount() {
@@ -94,18 +85,18 @@ class StagingForm extends Component {
         this.namespaceField.removeEventListener('blur', this.validateNamespace)
     }
 
-    handleChange(event) {
+    handleChange = (event) => {
         const stateKey = event.target.name;
         this.setState({ [stateKey]: event.target.value }, () => {
             this.emptyFormFields();
         });
     }
 
-    resetForm() {
+    resetForm = () => {
         this.setState(initialState)
     }
 
-    async handleSubmit(event) {
+    handleSubmit = async(event) => {
         event.preventDefault();
         const {
             token,
@@ -143,13 +134,13 @@ class StagingForm extends Component {
         });
     }
 
-    validateNamespace(event) {
+    validateNamespace = (event) => {
         const regExp = RegExp(/^[a-z0-9]([-a-z0-9]*[a-z0-9])?$/);
         const invalidNamespace = !regExp.test(event.target.value);
         this.props.setNamespaceStatus(invalidNamespace);
     }
 
-    emptyFormFields() {
+    emptyFormFields = () => {
         const {
             flavor,
             hubTimeout,
@@ -171,7 +162,6 @@ class StagingForm extends Component {
             expirationHours,
             dbInstances
         } = this.props;
-        // const primary = deepPurple[200];
 
         return (
             <div className={classes.formContainer}>

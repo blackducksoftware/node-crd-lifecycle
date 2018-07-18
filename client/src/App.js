@@ -32,15 +32,6 @@ class App extends Component {
             toastMsgText: '',
             toastMsgVariant: 'success'
         };
-
-        this.fetchInstances = this.fetchInstances.bind(this);
-        this.addInstance = this.addInstance.bind(this);
-        this.removeInstance = this.removeInstance.bind(this);
-        this.handleDelete = this.handleDelete.bind(this);
-        this.setNamespaceStatus = this.setNamespaceStatus.bind(this);
-        this.fetchDatabases = this.fetchDatabases.bind(this);
-        this.setToastStatus = this.setToastStatus.bind(this);
-        this.handleToastMsgClick = this.handleToastMsgClick.bind(this);
     }
 
     componentDidMount() {
@@ -56,7 +47,7 @@ class App extends Component {
     }
 
     //TODO: remove hardcoded tokens
-    async fetchInstances() {
+    fetchInstances = async() => {
         const response = await fetch('/api/instances', {
             credentials: 'same-origin',
             headers: {
@@ -75,7 +66,7 @@ class App extends Component {
         }
     }
 
-    async fetchDatabases() {
+    fetchDatabases = async() => {
         const response = await fetch('/api/sql-instances', {
             credentials: 'same-origin',
             headers: {
@@ -97,7 +88,7 @@ class App extends Component {
         }
     }
 
-    async handleDelete(namespace) {
+    handleDelete = async(namespace) => {
         const response = await fetch('/api/instances', {
             method: 'DELETE',
             credentials: 'same-origin',
@@ -128,7 +119,7 @@ class App extends Component {
         });
     }
 
-    addInstance(instance) {
+    addInstance = (instance) => {
         this.setState({
             instances: {
                 ...this.state.instances,
@@ -139,7 +130,7 @@ class App extends Component {
         });
     }
 
-    removeInstance(namespace) {
+    removeInstance = (namespace) => {
         const { [namespace] : instance, ...rest } = this.state.instances
         this.setState({
             instances: {
@@ -148,13 +139,13 @@ class App extends Component {
         });
     }
 
-    setNamespaceStatus(invalidNamespace) {
+    setNamespaceStatus = (invalidNamespace) => {
         if (this.state.invalidNamespace !== invalidNamespace) {
             this.setState({ invalidNamespace });
         }
     }
 
-    setToastStatus({ toastMsgOpen, toastMsgVariant, toastMsgText }) {
+    setToastStatus = ({ toastMsgOpen, toastMsgVariant, toastMsgText }) => {
         this.setState({
             toastMsgOpen,
             toastMsgVariant,
@@ -162,7 +153,7 @@ class App extends Component {
         })
     }
 
-    handleToastMsgClick(event, reason) {
+    handleToastMsgClick = (event, reason) => {
         if (reason === 'clickaway') {
             return;
         }
